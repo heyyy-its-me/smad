@@ -7,6 +7,8 @@ import AgentPipeline, { agents } from "@/components/testing/AgentPipeline";
 import AgentHeader from "@/components/testing/AgentHeader";
 import LeadForm from "@/components/testing/LeadForm";
 import ICPForm from "@/components/testing/ICPForm";
+import MeetingForm from "@/components/testing/MeetingForm";
+import ProposalForm from "@/components/testing/ProposalForm";
 import AgentProgress from "@/components/testing/AgentProgress";
 import PortalBackdrop from "@/components/testing/PortalBackdrop";
 import type { AgentResult } from "@/lib/types";
@@ -238,6 +240,14 @@ export default function Home() {
                     <strong>{outreachLeads.length ? `${outreachLeads.length} leads ready for outreach` : "No lead results selected"}</strong>
                     <p>{outreachLeads.length ? "Email is sent only after you click Send emails to leads." : "Return to Lead Management, run it, then choose Send mail to leads."}</p>
                   </div>
+                </div>
+              ) : active === "meeting" ? (
+                <div className="input-body">
+                  <MeetingForm />
+                </div>
+              ) : active === "proposal" ? (
+                <div className="input-body">
+                  <ProposalForm />
                 </div>
               ) : (
                 <div className="automatic-mode">

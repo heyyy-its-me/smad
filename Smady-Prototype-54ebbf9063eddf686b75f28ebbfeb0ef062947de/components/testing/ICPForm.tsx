@@ -191,6 +191,21 @@ export default function ICPForm({ payload, onChange }: ICPFormProps) {
           transition: all var(--duration-fast) ease;
         }
 
+        .form-select {
+          appearance: none;
+          padding-right: 32px;
+          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23888' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
+          background-repeat: no-repeat;
+          background-position: right 10px center;
+          cursor: pointer;
+        }
+
+        .form-select option {
+          background-color: var(--bg-input);
+          color: var(--text-primary);
+          padding: 8px;
+        }
+
         .form-textarea:focus,
         .form-input:focus,
         .form-select:focus {

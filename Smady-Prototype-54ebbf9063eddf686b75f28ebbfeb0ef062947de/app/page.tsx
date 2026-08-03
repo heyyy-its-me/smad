@@ -277,7 +277,6 @@ export default function Home() {
               <div className="card execution-card">
                 <AgentProgress
                   agentId={active}
-                  icpPayload={active === "icp" ? icpForm : undefined}
                   icpFormData={active === "icp" ? icpForm : undefined}
                   payload={active === "leads" ? leadPayload : active === "outreach" ? outreachPayload : undefined}
                   onPrepareRun={active === "leads" ? createLeadPayloadForRun : undefined}

@@ -284,7 +284,7 @@ export default function ICPOutputViewer({ result }: ICPOutputViewerProps) {
       )}
 
       {/* Secondary ICPs Section */}
-      {result.secondary_icps?.length > 0 && (
+      {(result.secondary_icps ?? []).length > 0 && (
         <section className="output-section">
           <button
             className="section-header"
@@ -295,7 +295,7 @@ export default function ICPOutputViewer({ result }: ICPOutputViewerProps) {
             ) : (
               <ChevronRight size={16} />
             )}
-            <h3>Secondary ICPs ({result.secondary_icps.length})</h3>
+            <h3>Secondary ICPs ({result.secondary_icps!.length})</h3>
           </button>
           {expandedSections.has('secondary_icp') && (
             <div className="section-content">

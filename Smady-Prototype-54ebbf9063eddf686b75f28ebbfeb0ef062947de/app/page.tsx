@@ -3,7 +3,7 @@
 import { useCallback, useMemo, useState } from "react";
 import Sidebar from "@/components/testing/Sidebar";
 import TopBar from "@/components/testing/TopBar";
-import AgentPipeline, { agents, type AgentInfo } from "@/components/testing/AgentPipeline";
+import AgentPipeline, { agents } from "@/components/testing/AgentPipeline";
 import AgentHeader from "@/components/testing/AgentHeader";
 import LeadForm from "@/components/testing/LeadForm";
 import ICPForm from "@/components/testing/ICPForm";

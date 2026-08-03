@@ -1,6 +1,5 @@
 'use client';
 
-import { X } from 'lucide-react';
 import { useState } from 'react';
 import type { ICPRequestPayload } from '@/lib/icp-api-client';
 

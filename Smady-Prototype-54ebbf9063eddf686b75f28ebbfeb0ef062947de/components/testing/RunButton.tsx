@@ -1,7 +1,6 @@
 'use client';
 
 import { Play, Square, Loader2 } from 'lucide-react';
-import { clsx } from 'clsx';
 
 interface RunButtonProps {
   state: 'idle' | 'loading' | 'running' | 'completed' | 'failed';

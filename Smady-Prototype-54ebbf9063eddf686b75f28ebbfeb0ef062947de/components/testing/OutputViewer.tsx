@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { ChevronDown, ChevronRight, FileText, Table2, Download } from 'lucide-react';
+import { ChevronDown, ChevronRight, FileText, Table2 } from 'lucide-react';
 import type { AgentResult } from '@/lib/types';
 
 interface OutputViewerProps {

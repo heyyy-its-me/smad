@@ -13,7 +13,6 @@ import ICPOutputViewer from './ICPOutputViewer';
 interface AgentProgressProps {
   agentId: string;
   payload?: Record<string, unknown>;
-  icpPayload?: ICPRequestPayload;
   icpFormData?: ICPRequestPayload;
   onPrepareRun?: () => Record<string, unknown>;
   onRunningChange?: (running: boolean) => void;
@@ -27,7 +26,6 @@ interface AgentProgressProps {
 export default function AgentProgress({
   agentId,
   payload,
-  icpPayload,
   icpFormData,
   onPrepareRun,
   onRunningChange,
@@ -157,7 +155,7 @@ export default function AgentProgress({
 
   const handleRun = useCallback(async () => {
     setView('console');
-    setExecState('loading');
+    setExecState('running');
     setExecError(null);
 
     // Handle ICP agent differently - call API directly
@@ -205,12 +203,10 @@ export default function AgentProgress({
   }, []);
 
   const isRunning = runner.isRunning;
-  const isLoading = execState === 'loading';
 
   // Determine the run button state
   const runButtonState = (() => {
-    if (isLoading) return 'loading' as const;
-    if (isRunning || (execState === 'loading' && agentId === 'icp')) return 'running' as const;
+    if (execState === 'running') return 'running' as const;
     if (execState === 'completed') return 'completed' as const;
     if (execState === 'failed' || execState === 'error') return 'failed' as const;
     return 'idle' as const;
@@ -240,7 +236,7 @@ export default function AgentProgress({
       </div>
 
       {/* View toggle when there's a result */}
-      {(result || icpResult) && !isRunning && !isLoading && (
+      {(result || icpResult) && !isRunning && execState !== 'running' && (
         <div className="view-toggle">
           <button
             onClick={() => setView('console')}
@@ -282,7 +278,7 @@ export default function AgentProgress({
       )}
 
       {/* Idle state */}
-      {!result && !icpResult && !isRunning && !isLoading && !execError && (
+      {!result && !icpResult && !isRunning && execState === 'idle' && !execError && (
         <div className="idle-prompt">
           <div className="idle-icon">✦</div>
           <h3>Ready to test</h3>

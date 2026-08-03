@@ -174,7 +174,7 @@ export default function ICPOutputViewer({ result }: ICPOutputViewerProps) {
                 <div className="text-section">
                   <h4>Target Countries</h4>
                   <div className="tag-list">
-                    {result.gtm_strategy.target_countries.map((country, i) => (
+                    {result.gtm_strategy.target_countries!.map((country, i) => (
                       <span key={i} className="tag">
                         {country}
                       </span>
@@ -187,7 +187,7 @@ export default function ICPOutputViewer({ result }: ICPOutputViewerProps) {
                 <div className="text-section">
                   <h4>Target Regions</h4>
                   <div className="tag-list">
-                    {result.gtm_strategy.target_regions.map((region, i) => (
+                    {result.gtm_strategy.target_regions!.map((region, i) => (
                       <span key={i} className="tag">
                         {region}
                       </span>
@@ -200,7 +200,7 @@ export default function ICPOutputViewer({ result }: ICPOutputViewerProps) {
                 <div className="text-section">
                   <h4>Recommended Sales Channels</h4>
                   <div className="tag-list">
-                    {result.gtm_strategy.recommended_channels.map((channel, i) => (
+                    {result.gtm_strategy.recommended_channels!.map((channel, i) => (
                       <span key={i} className="tag channel">
                         {channel}
                       </span>
@@ -299,7 +299,7 @@ export default function ICPOutputViewer({ result }: ICPOutputViewerProps) {
           </button>
           {expandedSections.has('secondary_icp') && (
             <div className="section-content">
-              {result.secondary_icps.map((icp, idx) => (
+              {result.secondary_icps!.map((icp, idx) => (
                 <div key={idx} className="secondary-icp-card">
                   <div className="icp-header">
                     <span className="icp-title">{icp.icp}</span>
@@ -346,7 +346,7 @@ export default function ICPOutputViewer({ result }: ICPOutputViewerProps) {
                 <div className="text-section">
                   <h4>Key Roles</h4>
                   <div className="tag-list">
-                    {result.buyer_persona.role.map((role, i) => (
+                    {result.buyer_persona.role!.map((role, i) => (
                       <span key={i} className="tag role">
                         {role}
                       </span>
@@ -359,7 +359,7 @@ export default function ICPOutputViewer({ result }: ICPOutputViewerProps) {
                 <div className="text-section">
                   <h4>Top Pain Points</h4>
                   <ul className="bulleted-list">
-                    {result.buyer_persona.pain_points.map((point, i) => (
+                    {result.buyer_persona.pain_points!.map((point, i) => (
                       <li key={i}>{point}</li>
                     ))}
                   </ul>
@@ -370,7 +370,7 @@ export default function ICPOutputViewer({ result }: ICPOutputViewerProps) {
                 <div className="text-section">
                   <h4>Key Goals</h4>
                   <ul className="bulleted-list">
-                    {result.buyer_persona.goals.map((goal, i) => (
+                    {result.buyer_persona.goals!.map((goal, i) => (
                       <li key={i}>{goal}</li>
                     ))}
                   </ul>

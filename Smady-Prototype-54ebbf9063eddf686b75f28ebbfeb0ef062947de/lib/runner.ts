@@ -141,7 +141,7 @@ export class AgentRunner {
     this.cancel(); // clean up previous run
     this.cancelled = false;
     this.executionError = null;
-    this.setExecutionState('loading');
+    this.setExecutionState('running');
 
     // Create a placeholder execution immediately for UI responsiveness
     const placeholderExecution: AgentExecution = {
@@ -758,9 +758,9 @@ export class AgentRunner {
     return this.execution?.status === 'running' || false;
   }
 
-  /** Check if currently loading (connecting to backend) */
+  /** Check if currently running */
   get isLoading(): boolean {
-    return this.executionState === 'loading';
+    return this.executionState === 'running';
   }
 
   /** Get current execution status */

@@ -109,16 +109,20 @@ export default function Sidebar({ activeView, onViewChange }: SidebarProps) {
         .workspace-selector {
           display: flex;
           align-items: center;
-          gap: 10px;
-          padding: 10px 12px;
+          gap: 12px;
+          padding: 12px 14px;
           border: 1px solid var(--border-subtle);
-          border-radius: var(--radius-md);
-          background: rgba(255,255,255,0.03);
-          margin-bottom: 28px;
+          border-radius: var(--radius-lg);
+          background: linear-gradient(135deg, rgba(124, 92, 255, 0.08) 0%, rgba(34, 211, 197, 0.05) 100%);
+          margin-bottom: 32px;
           cursor: pointer;
-          transition: border-color var(--duration-fast) ease;
+          transition: all var(--duration-normal) var(--ease-smooth);
         }
-        .workspace-selector:hover { border-color: var(--border-default); }
+        .workspace-selector:hover {
+          border-color: var(--border-default);
+          background: linear-gradient(135deg, rgba(124, 92, 255, 0.12) 0%, rgba(34, 211, 197, 0.08) 100%);
+          transform: translateY(-1px);
+        }
         .workspace-avatar {
           width: 28px; height: 28px; border-radius: 8px;
           display: grid; place-items: center;
@@ -136,17 +140,17 @@ export default function Sidebar({ activeView, onViewChange }: SidebarProps) {
           letter-spacing: 0.12em; color: var(--text-muted);
         }
         .nav-item {
-          display: flex; align-items: center; gap: 10px; width: 100%;
-          min-height: 38px; padding: 0 12px; margin: 2px 0;
-          border-radius: var(--radius-sm); font-size: 13px;
-          color: var(--text-secondary); transition: all var(--duration-fast) ease;
+          display: flex; align-items: center; gap: 12px; width: 100%;
+          min-height: 40px; padding: 0 14px; margin: 4px 0;
+          border-radius: var(--radius-lg); font-size: 13px; font-weight: 600;
+          color: var(--text-secondary); transition: all var(--duration-normal) var(--ease-smooth);
           text-align: left; position: relative;
         }
-        .nav-item:hover { color: var(--text-primary); background: rgba(255,255,255,0.04); }
+        .nav-item:hover { color: var(--text-primary); background: rgba(124, 92, 255, 0.12); }
         .nav-item.active {
           color: var(--text-primary);
-          background: linear-gradient(90deg, rgba(255, 255, 255,0.15), rgba(255, 255, 255,0.04));
-          box-shadow: inset 2px 0 0 var(--violet);
+          background: linear-gradient(90deg, rgba(124, 92, 255, 0.18), rgba(124, 92, 255, 0.08));
+          box-shadow: inset 2px 0 0 var(--violet-bright);
         }
         .nav-icon { flex-shrink: 0; opacity: 0.7; }
         .nav-item.active .nav-icon { opacity: 1; color: var(--violet-bright); }

@@ -132,21 +132,30 @@ export default function ProposalForm() {
                 className={`submit-btn ${status === 'success' ? 'success' : ''} ${status === 'error' ? 'error' : ''} ${isLoading ? 'loading' : ''}`}
               >
                 {status === 'success' ? (
-                  <>✓ Sent</>
+                  <>
+                    <CheckCircle2 size={16} />
+                    <span>Sent</span>
+                  </>
                 ) : status === 'error' ? (
-                  <>✕ Failed</>
+                  <>
+                    <AlertCircle size={16} />
+                    <span>Failed</span>
+                  </>
                 ) : isLoading ? (
-                  <>⟳ Triggering...</>
+                  <>
+                    <span className="spinner">⟳</span>
+                    <span>Triggering...</span>
+                  </>
                 ) : (
                   <>
-                    <Send size={14} />
-                    Trigger Proposal
+                    <Send size={16} />
+                    <span>Send Proposal</span>
                   </>
                 )}
               </button>
             </div>
             <span className="field-hint">
-              Personalized proposal will be generated for {name || 'you'} and sent to this email address
+              Personalized proposal will be generated and sent to {name || 'your email'}
             </span>
             {status === 'error' && (
               <div className="error-message">
@@ -322,20 +331,26 @@ export default function ProposalForm() {
 
         .form-input {
           flex: 1;
-          padding: 10px 12px;
-          border-radius: var(--radius-sm);
+          padding: 12px 14px;
+          border-radius: var(--radius-md);
           border: 1px solid var(--border-subtle);
-          background: var(--bg-input);
+          background: rgba(15, 22, 51, 0.7);
           color: var(--text-primary);
-          font-size: 13px;
+          font-size: 14px;
           font-family: inherit;
-          transition: all var(--duration-fast) ease;
+          transition: all var(--duration-normal) var(--ease-smooth);
         }
 
         .form-input:focus {
           outline: none;
           border-color: var(--green-bright);
-          box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.1);
+          background: rgba(15, 22, 51, 0.9);
+          box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.15), 0 4px 16px rgba(34, 197, 94, 0.2);
+        }
+
+        .form-input:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
         }
 
         .form-input::placeholder {
@@ -345,24 +360,29 @@ export default function ProposalForm() {
         .submit-btn {
           display: inline-flex;
           align-items: center;
-          gap: 6px;
-          padding: 10px 16px;
-          background: var(--green-bright);
-          color: var(--text-primary);
+          gap: 8px;
+          padding: 10px 18px;
+          background: linear-gradient(135deg, var(--green-bright) 0%, #16a34a 100%);
+          color: #fff;
           border: none;
-          border-radius: var(--radius-sm);
-          font-size: 12px;
+          border-radius: var(--radius-md);
+          font-size: 13px;
           font-weight: 700;
           cursor: pointer;
-          transition: all var(--duration-fast) ease;
+          transition: all var(--duration-normal) var(--ease-smooth);
           white-space: nowrap;
+          box-shadow: 0 4px 15px rgba(34, 197, 94, 0.3);
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
         }
 
         .submit-btn:hover:not(:disabled) {
-          background: var(--green-bright);
-          opacity: 0.9;
-          transform: translateY(-1px);
-          box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+          transform: translateY(-2px);
+          box-shadow: 0 8px 24px rgba(34, 197, 94, 0.4);
+        }
+
+        .submit-btn:active:not(:disabled) {
+          transform: translateY(0);
         }
 
         .submit-btn:disabled {
@@ -371,18 +391,20 @@ export default function ProposalForm() {
         }
 
         .submit-btn.loading {
-          opacity: 0.7;
+          opacity: 0.9;
           pointer-events: none;
         }
 
+        .submit-btn.loading .spinner {
+          animation: spin-slow 1.5s linear infinite;
+        }
+
         .submit-btn.success {
-          background: var(--green-bright);
-          opacity: 0.8;
+          background: linear-gradient(135deg, var(--status-completed) 0%, #16a34a 100%);
         }
 
         .submit-btn.error {
-          background: var(--status-failed);
-          opacity: 0.8;
+          background: linear-gradient(135deg, var(--status-failed) 0%, #dc2626 100%);
         }
 
         .field-hint {

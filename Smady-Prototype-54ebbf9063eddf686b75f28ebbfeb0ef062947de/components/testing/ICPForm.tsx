@@ -173,22 +173,33 @@ export default function ICPForm({ payload, onChange }: ICPFormProps) {
         }
 
         .form-group label {
-          font-size: 12px;
-          font-weight: 500;
-          color: var(--text-secondary);
+          font-size: 13px;
+          font-weight: 700;
+          color: var(--text-primary);
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
         }
 
         .form-textarea,
         .form-input,
         .form-select {
-          padding: 10px 12px;
-          border-radius: var(--radius-sm);
+          padding: 12px 14px;
+          border-radius: var(--radius-md);
           border: 1px solid var(--border-subtle);
-          background: var(--bg-input);
+          background: rgba(15, 22, 51, 0.7);
           color: var(--text-primary);
-          font-size: 13px;
+          font-size: 14px;
           font-family: inherit;
-          transition: all var(--duration-fast) ease;
+          transition: all var(--duration-normal) var(--ease-smooth);
+        }
+
+        .form-textarea:focus,
+        .form-input:focus,
+        .form-select:focus {
+          outline: none;
+          border-color: var(--violet-bright);
+          background: rgba(15, 22, 51, 0.9);
+          box-shadow: 0 0 0 3px rgba(124, 92, 255, 0.15), 0 4px 16px rgba(124, 92, 255, 0.2);
         }
 
         .form-select {

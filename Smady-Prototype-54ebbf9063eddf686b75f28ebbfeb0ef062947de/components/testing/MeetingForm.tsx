@@ -75,69 +75,62 @@ export default function MeetingForm() {
         }
 
         .instruction-card {
-          background: linear-gradient(135deg, rgba(251, 146, 60, 0.05) 0%, rgba(251, 146, 60, 0.02) 100%);
-          border: 1px solid var(--border-subtle);
-          border-radius: var(--radius-md);
+          background: linear-gradient(135deg, rgba(251, 146, 60, 0.06) 0%, rgba(251, 146, 60, 0.02) 100%);
+          border: 1px solid rgba(251, 146, 60, 0.2);
+          border-radius: var(--radius-lg);
           overflow: hidden;
           display: flex;
           flex-direction: column;
+          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
         }
 
         .card-header {
           display: flex;
-          gap: 16px;
-          padding: 24px;
-          border-bottom: 1px solid var(--border-subtle);
-          background: rgba(251, 146, 60, 0.03);
-        }
-
-        .card-icon {
-          font-size: 32px;
-          line-height: 1;
-        }
-
-        .card-title-section {
-          display: flex;
-          flex-direction: column;
-          gap: 4px;
+          gap: 18px;
+          padding: 28px;
+          border-bottom: 1px solid rgba(251, 146, 60, 0.15);
+          background: linear-gradient(135deg, rgba(251, 146, 60, 0.08) 0%, rgba(251, 146, 60, 0.03) 100%);
         }
 
         .card-title {
-          font-size: 18px;
-          font-weight: 700;
+          font-size: 20px;
+          font-weight: 800;
           color: var(--text-primary);
           margin: 0;
-          letter-spacing: -0.3px;
+          letter-spacing: -0.4px;
         }
 
         .card-subtitle {
-          font-size: 12px;
+          font-size: 13px;
           color: var(--text-secondary);
           margin: 0;
           font-weight: 500;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
         }
 
         .card-body {
-          padding: 24px;
+          padding: 28px;
           display: flex;
           flex-direction: column;
-          gap: 16px;
+          gap: 20px;
         }
 
         .instruction-text {
-          font-size: 14px;
-          line-height: 1.6;
+          font-size: 15px;
+          line-height: 1.7;
           color: var(--text-secondary);
           margin: 0;
         }
 
         .instruction-text.emphasis {
           color: var(--text-primary);
-          font-weight: 500;
-          background: rgba(251, 146, 60, 0.08);
-          padding: 12px 14px;
-          border-radius: var(--radius-sm);
-          border-left: 3px solid var(--orange-bright);
+          font-weight: 600;
+          background: linear-gradient(135deg, rgba(251, 146, 60, 0.12) 0%, rgba(251, 146, 60, 0.05) 100%);
+          padding: 16px;
+          border-radius: var(--radius-md);
+          border-left: 4px solid var(--orange-bright);
+          box-shadow: 0 4px 12px rgba(251, 146, 60, 0.1);
         }
 
         .features-list {
@@ -150,38 +143,50 @@ export default function MeetingForm() {
         .feature-item {
           display: flex;
           align-items: center;
-          gap: 10px;
-          font-size: 13px;
+          gap: 12px;
+          font-size: 14px;
           color: var(--text-secondary);
+          line-height: 1.6;
         }
 
         .feature-check {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          min-width: 24px;
+          width: 24px;
+          height: 24px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, rgba(251, 146, 60, 0.3) 0%, rgba(251, 146, 60, 0.1) 100%);
           color: var(--orange-bright);
+          font-size: 14px;
           font-weight: 700;
-          min-width: 20px;
+          flex-shrink: 0;
         }
 
         .form-container {
-          padding: 24px;
-          border-top: 1px solid var(--border-subtle);
+          padding: 28px;
+          border-top: 1px solid rgba(251, 146, 60, 0.15);
           flex: 1;
+          background: linear-gradient(180deg, rgba(251, 146, 60, 0.02) 0%, transparent 100%);
         }
 
         .footer-note {
-          padding: 20px 24px;
-          border-top: 1px solid var(--border-subtle);
-          background: rgba(251, 146, 60, 0.02);
+          padding: 20px 28px;
+          border-top: 1px solid rgba(251, 146, 60, 0.15);
+          background: rgba(251, 146, 60, 0.03);
           display: flex;
           justify-content: space-between;
           align-items: center;
-          gap: 16px;
+          gap: 20px;
         }
 
         .footer-note p {
-          font-size: 12px;
-          color: var(--text-tertiary);
+          font-size: 13px;
+          color: var(--text-secondary);
           margin: 0;
           flex: 1;
+          line-height: 1.6;
         }
 
         .external-link-btn {

@@ -204,10 +204,11 @@ export default function LeadForm({ values, onChange, payload }: LeadFormProps) {
         }
 
         .field-label {
-          font-size: 10px;
-          font-weight: 600;
-          color: var(--text-secondary);
-          letter-spacing: 0.02em;
+          font-size: 13px;
+          font-weight: 700;
+          color: var(--text-primary);
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
         }
 
         .field-hint {
@@ -219,17 +220,18 @@ export default function LeadForm({ values, onChange, payload }: LeadFormProps) {
         .input-wrapper {
           display: flex;
           align-items: center;
-          gap: 4px;
-          padding: 0 8px;
-          border: 1px solid var(--border-default);
-          border-radius: var(--radius-sm);
-          background: rgba(6, 11, 30, 0.5);
-          transition: all var(--duration-fast) ease;
+          gap: 8px;
+          padding: 0 12px;
+          border: 1px solid var(--border-subtle);
+          border-radius: var(--radius-md);
+          background: rgba(15, 22, 51, 0.7);
+          transition: all var(--duration-normal) var(--ease-smooth);
         }
 
         .input-wrapper.focused {
-          border-color: var(--violet);
-          box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
+          border-color: var(--cyan-bright);
+          background: rgba(15, 22, 51, 0.9);
+          box-shadow: 0 0 0 3px rgba(34, 211, 197, 0.15), 0 4px 16px rgba(34, 211, 197, 0.2);
         }
 
         .textarea-wrapper {

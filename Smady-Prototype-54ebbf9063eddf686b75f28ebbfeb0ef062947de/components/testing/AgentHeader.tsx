@@ -62,19 +62,19 @@ export default function AgentHeader({ agent, runStatus }: AgentHeaderProps) {
         }
 
         .agent-title {
-          font-size: 22px;
-          font-weight: 700;
-          letter-spacing: -0.3px;
+          font-size: 24px;
+          font-weight: 800;
+          letter-spacing: -0.5px;
           color: var(--text-primary);
           margin: 0;
         }
 
         .agent-desc {
-          font-size: 13px;
-          color: var(--text-tertiary);
-          margin: 6px 0 0;
-          max-width: 520px;
-          line-height: 1.5;
+          font-size: 14px;
+          color: var(--text-secondary);
+          margin: 8px 0 0;
+          max-width: 600px;
+          line-height: 1.7;
         }
       `}</style>
     </div>

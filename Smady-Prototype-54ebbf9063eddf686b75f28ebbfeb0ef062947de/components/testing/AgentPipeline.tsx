@@ -159,25 +159,26 @@ export default function AgentPipeline({ active, onSelect, runningAgent }: AgentP
           display: flex;
           flex-direction: column;
           align-items: center;
-          gap: 6px;
-          padding: 8px 4px;
+          gap: 8px;
+          padding: 12px 8px;
           border: none;
           background: transparent;
           color: var(--text-tertiary);
           cursor: pointer;
-          transition: all var(--duration-normal) var(--ease-out);
+          transition: all var(--duration-normal) var(--ease-smooth);
           position: relative;
-          border-radius: var(--radius-md);
-          min-width: 72px;
+          border-radius: var(--radius-lg);
+          min-width: 80px;
           flex: 1;
         }
 
         .step-button:hover {
           color: var(--text-secondary);
+          background: rgba(124, 92, 255, 0.08);
         }
 
         .step-button:hover .step-icon {
-          transform: scale(1.08);
+          transform: scale(1.12);
         }
 
         .step-button.active {
@@ -185,19 +186,36 @@ export default function AgentPipeline({ active, onSelect, runningAgent }: AgentP
         }
 
         .step-icon {
-          width: 40px;
-          height: 40px;
-          border-radius: 12px;
+          width: 48px;
+          height: 48px;
+          border-radius: var(--radius-lg);
           display: grid;
           place-items: center;
           transition: all var(--duration-normal) var(--ease-spring);
-          border: 1px solid transparent;
+          border: 1.5px solid transparent;
+          background: rgba(124, 92, 255, 0.08);
+        }
+
+        .step-icon.violet {
+          background: rgba(124, 92, 255, 0.15);
+        }
+
+        .step-icon.cyan {
+          background: rgba(34, 211, 197, 0.15);
+        }
+
+        .step-icon.pink {
+          background: rgba(244, 114, 182, 0.15);
+        }
+
+        .step-icon.orange {
+          background: rgba(251, 146, 60, 0.15);
         }
 
         .step-icon.active {
-          border-color: var(--violet);
-          box-shadow: 0 0 16px rgba(255, 255, 255, 0.2);
-          animation: pulse-glow 2s ease-in-out infinite;
+          border-color: var(--violet-bright);
+          box-shadow: 0 0 20px rgba(124, 92, 255, 0.3);
+        }
         }
 
         .step-button.is-running .step-icon {

@@ -158,13 +158,8 @@ export default function RunButton({ state, onRun, onCancel, disabled, idleLabel 
         .run-btn:hover::before { transform: translateX(100%); }
         .run-btn:active { transform: translateY(0); box-shadow: 0 2px 8px rgba(255, 255, 255,0.3); }
         .play-icon { display: grid; place-items: center; }
-          /* Playful run controls */
-          .run-btn { border-radius: 999px !important; min-height: 44px; padding-inline: 24px !important; }
-          .run-btn.idle { background: #f5f5f5 !important; color: #111 !important; box-shadow: 0 8px 20px rgba(0,0,0,0.22) !important; }
-          .run-btn.idle:hover { box-shadow: 0 10px 24px rgba(0,0,0,0.32) !important; transform: translateY(-3px) scale(1.02) !important; }
-          .run-btn.loading { background: linear-gradient(100deg, rgba(189,120,255,0.25), rgba(85,219,201,0.18)) !important; }
-          .run-btn.running { background: linear-gradient(100deg, rgba(255,126,157,0.22), rgba(255,184,107,0.16)) !important; }
-          .run-btn.completed { background: linear-gradient(100deg, rgba(255, 255, 255,0.2), rgba(168,245,138,0.15)) !important; }
+          /* Playful run controls - Premium styling */
+          .run-btn { border-radius: 999px !important; min-height: 46px; padding-inline: 32px !important; font-weight: 800 !important; font-size: 13px !important; letter-spacing: 0.08em !important; text-transform: uppercase !important; }\n          .run-btn.idle { background: linear-gradient(135deg, var(--violet-bright) 0%, var(--violet) 100%) !important; color: #fff !important; box-shadow: 0 8px 24px rgba(124, 92, 255, 0.35) !important; }\n          .run-btn.idle:hover { box-shadow: 0 12px 32px rgba(124, 92, 255, 0.45) !important; transform: translateY(-3px) !important; }\n          .run-btn.idle:active { transform: translateY(-1px) !important; }\n          .run-btn.loading { background: linear-gradient(100deg, rgba(124,92,255,0.4), rgba(34,211,197,0.3)) !important; border: 1px solid rgba(124, 92, 255, 0.4) !important; }\n          .run-btn.running { background: linear-gradient(100deg, rgba(244,114,182,0.35), rgba(251,146,60,0.28)) !important; border: 1px solid rgba(244,114,182,0.4) !important; }\n          .run-btn.completed { background: linear-gradient(100deg, rgba(94,234,158,0.3), rgba(34,197,94,0.25)) !important; border: 1px solid rgba(94,234,158,0.4) !important; }
       `}</style>
     </button>
   );

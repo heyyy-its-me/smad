@@ -138,7 +138,7 @@ export default function RunButton({ state, onRun, onCancel, disabled, idleLabel 
           display: inline-flex; align-items: center; gap: 10px;
           padding: 12px 28px; border-radius: var(--radius-md);
           border: none;
-          background: #f5f5f5; color: #111;
+          background: transparent;
           color: #fff;
           font-size: 13px; font-weight: 700; letter-spacing: 0.03em;
           cursor: pointer; transition: all var(--duration-normal) var(--ease-spring);

@@ -50,7 +50,7 @@ const fieldGroups: LeadFormFieldGroup[] = [
     fields: [
       { key: 'region' as const, label: 'Region', placeholder: 'e.g. Canada', wide: false },
       { key: 'cities' as const, label: 'Cities', placeholder: 'Toronto, Vancouver', wide: false, hint: 'Comma-separated' },
-      { key: 'states' as const, label: 'States / Provinces', placeholder: 'Optional', wide: false },
+      { key: 'states' as const, label: 'States / Provinces', placeholder: 'Optional', wide: true },
     ],
   },
   {

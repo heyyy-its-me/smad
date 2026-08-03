@@ -8,25 +8,36 @@ export async function POST(request: Request) {
     console.log('[ICP Proxy] Forwarding request to:', icpApiUrl);
     console.log('[ICP Proxy] Payload:', JSON.stringify(body));
 
-    const response = await fetch(icpApiUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-      timeout: 30000, // 30 second timeout
-    });
+    // Use AbortController for timeout (native Fetch API doesn't support timeout directly)
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
 
-    if (!response.ok) {
-      const text = await response.text();
-      console.log('[ICP Proxy] API returned error:', response.status, text);
-      return Response.json(
-        { error: `ICP API error ${response.status}: ${text}` },
-        { status: response.status }
-      );
+    try {
+      const response = await fetch(icpApiUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        const text = await response.text();
+        console.log('[ICP Proxy] API returned error:', response.status, text);
+        return Response.json(
+          { error: `ICP API error ${response.status}: ${text}` },
+          { status: response.status }
+        );
+      }
+
+      const data = await response.json();
+      console.log('[ICP Proxy] Success:', data);
+      return Response.json(data);
+    } catch (fetchError) {
+      clearTimeout(timeoutId);
+      throw fetchError;
     }
-
-    const data = await response.json();
-    console.log('[ICP Proxy] Success:', data);
-    return Response.json(data);
   } catch (error) {
     const msg = error instanceof Error ? error.message : 'Unknown error';
     console.error('[ICP Proxy] Failed:', msg, error);

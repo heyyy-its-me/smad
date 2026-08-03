@@ -1,0 +1,31 @@
+
+> agent-testing-prototype-scaffold@0.1.0 build
+> next build --turbopack
+
+   ▲ Next.js 15.5.22 (Turbopack)
+   - Environments: .env.local
+
+   Creating an optimized production build ...
+ ✓ Finished writing to disk in 107ms
+ ✓ Compiled successfully in 14.6s
+   Linting and checking validity of types ...
+   Collecting page data ...
+   Generating static pages (0/5) ...
+   Generating static pages (1/5) 
+   Generating static pages (2/5) 
+   Generating static pages (3/5) 
+ ✓ Generating static pages (5/5)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                         Size  First Load JS
+┌ ○ /                            10.6 kB         124 kB
+└ ○ /_not-found                      0 B         114 kB
++ First Load JS shared by all     117 kB
+  ├ chunks/475395bf1b7ea74b.js   22.1 kB
+  ├ chunks/96f2f6d3b319aefc.js   75.5 kB
+  └ other shared chunks (total)  19.4 kB
+
+
+○  (Static)  prerendered as static content
+

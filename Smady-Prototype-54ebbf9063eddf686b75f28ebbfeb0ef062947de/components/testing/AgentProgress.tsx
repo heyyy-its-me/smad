@@ -3,24 +3,43 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { runner } from '@/lib/runner';
 import type { AgentExecution, AgentResult, LogEntry, RunnerEvent, ExecutionState, ExecutionError } from '@/lib/types';
+import type { ICPRequestPayload, ICPRecommendationResponse } from '@/lib/icp-api-client';
+import { requestICPRecommendation } from '@/lib/icp-api-client';
 import RunButton from './RunButton';
 import ExecutionConsole from './ExecutionConsole';
 import OutputViewer from './OutputViewer';
+import ICPOutputViewer from './ICPOutputViewer';
 
 interface AgentProgressProps {
   agentId: string;
   payload?: Record<string, unknown>;
+  icpPayload?: ICPRequestPayload;
+  icpFormData?: ICPRequestPayload;
   onPrepareRun?: () => Record<string, unknown>;
   onRunningChange?: (running: boolean) => void;
   onResult?: (result: AgentResult) => void;
+  onICPResult?: (result: ICPRecommendationResponse) => void;
   onSendMailToLeads?: (result: AgentResult) => void;
   actionLabel?: string;
   runDisabled?: boolean;
 }
 
-export default function AgentProgress({ agentId, payload, onPrepareRun, onRunningChange, onResult, onSendMailToLeads, actionLabel, runDisabled }: AgentProgressProps) {
+export default function AgentProgress({
+  agentId,
+  payload,
+  icpPayload,
+  icpFormData,
+  onPrepareRun,
+  onRunningChange,
+  onResult,
+  onICPResult,
+  onSendMailToLeads,
+  actionLabel,
+  runDisabled,
+}: AgentProgressProps) {
   const [execution, setExecution] = useState<AgentExecution | null>(null);
   const [result, setResult] = useState<AgentResult | null>(null);
+  const [icpResult, setICPResult] = useState<ICPRecommendationResponse | null>(null);
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [elapsed, setElapsed] = useState(0);
   const [view, setView] = useState<'console' | 'output'>('console');
@@ -140,6 +159,35 @@ export default function AgentProgress({ agentId, payload, onPrepareRun, onRunnin
     setView('console');
     setExecState('loading');
     setExecError(null);
+
+    // Handle ICP agent differently - call API directly
+    if (agentId === 'icp' && icpFormData) {
+      try {
+        onRunningChange?.(true);
+        const result = await requestICPRecommendation(icpFormData);
+        setICPResult(result);
+        setExecState(result.status === 'success' ? 'completed' : 'failed');
+        onICPResult?.(result);
+        if (result.status === 'error') {
+          setExecError({
+            type: 'api',
+            message: result.message || 'ICP analysis failed',
+          });
+        }
+      } catch (error) {
+        const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+        setExecError({
+          type: 'unknown',
+          message: errorMsg,
+        });
+        setExecState('failed');
+      } finally {
+        onRunningChange?.(false);
+      }
+      return;
+    }
+
+    // Handle other agents via runner
     try {
       if (agentId === 'leads') {
         const payloadForRun = onPrepareRun?.() ?? payload;
@@ -150,7 +198,7 @@ export default function AgentProgress({ agentId, payload, onPrepareRun, onRunnin
     } catch {
       // handled via events
     }
-  }, [agentId, onPrepareRun, payload]);
+  }, [agentId, icpFormData, onPrepareRun, payload, onRunningChange, onICPResult]);
 
   const handleCancel = useCallback(() => {
     runner.cancel();
@@ -162,7 +210,7 @@ export default function AgentProgress({ agentId, payload, onPrepareRun, onRunnin
   // Determine the run button state
   const runButtonState = (() => {
     if (isLoading) return 'loading' as const;
-    if (isRunning) return 'running' as const;
+    if (isRunning || (execState === 'loading' && agentId === 'icp')) return 'running' as const;
     if (execState === 'completed') return 'completed' as const;
     if (execState === 'failed' || execState === 'error') return 'failed' as const;
     return 'idle' as const;
@@ -192,7 +240,7 @@ export default function AgentProgress({ agentId, payload, onPrepareRun, onRunnin
       </div>
 
       {/* View toggle when there's a result */}
-      {result && !isRunning && !isLoading && (
+      {(result || icpResult) && !isRunning && !isLoading && (
         <div className="view-toggle">
           <button
             onClick={() => setView('console')}
@@ -223,18 +271,25 @@ export default function AgentProgress({ agentId, payload, onPrepareRun, onRunnin
       )}
 
       {/* Output */}
-      {view === 'output' && result && (
+      {view === 'output' && (
         <div className="card output-card">
-          <OutputViewer result={result} onSendMailToLeads={onSendMailToLeads} />
+          {agentId === 'icp' && icpResult ? (
+            <ICPOutputViewer result={icpResult} />
+          ) : result ? (
+            <OutputViewer result={result} onSendMailToLeads={onSendMailToLeads} />
+          ) : null}
         </div>
       )}
 
       {/* Idle state */}
-      {!result && !isRunning && !isLoading && !execError && (
+      {!result && !icpResult && !isRunning && !isLoading && !execError && (
         <div className="idle-prompt">
           <div className="idle-icon">✦</div>
           <h3>Ready to test</h3>
-          <p>Configure your input above and click <strong>Run Agent</strong> to start the execution.</p>
+          <p>
+            Configure your input above and click <strong>Run Agent</strong> to start the
+            execution.
+          </p>
         </div>
       )}
 

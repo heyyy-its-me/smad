@@ -6,9 +6,17 @@ import TopBar from "@/components/testing/TopBar";
 import AgentPipeline, { agents, type AgentInfo } from "@/components/testing/AgentPipeline";
 import AgentHeader from "@/components/testing/AgentHeader";
 import LeadForm from "@/components/testing/LeadForm";
+import ICPForm from "@/components/testing/ICPForm";
 import AgentProgress from "@/components/testing/AgentProgress";
 import PortalBackdrop from "@/components/testing/PortalBackdrop";
 import type { AgentResult } from "@/lib/types";
+import type { ICPRequestPayload, ICPRecommendationResponse } from "@/lib/icp-api-client";
+import {
+  extractRecommendedIndustries,
+  extractTargetRegions,
+  extractBuyerRoles,
+  estimateCompanySize,
+} from "@/lib/icp-api-client";
 
 type LeadFormData = {
   industry: string;
@@ -30,6 +38,15 @@ const initialLeadForm: LeadFormData = {
   business_context: "",
 };
 
+const initialICPForm: ICPRequestPayload = {
+  product_description: "",
+  target_geography: "United States",
+  business_stage: "Growth",
+  priority: "High",
+  company_name: "",
+  product_name: "",
+};
+
 const split = (value: string) =>
   value.split(",").map((part) => part.trim()).filter(Boolean);
 
@@ -48,11 +65,13 @@ export default function Home() {
   const [active, setActive] = useState("leads");
   const [manual, setManual] = useState(true);
   const [leadForm, setLeadForm] = useState<LeadFormData>(initialLeadForm);
+  const [icpForm, setICPForm] = useState<ICPRequestPayload>(initialICPForm);
   const [requestId, setRequestId] = useState(() => crypto.randomUUID());
   const [run, setRun] = useState(false);
   const [sidebarView, setSidebarView] = useState("studio");
   const [runningAgent, setRunningAgent] = useState<string | null>(null);
   const [leadResult, setLeadResult] = useState<AgentResult | null>(null);
+  const [icpResult, setICPResult] = useState<ICPRecommendationResponse | null>(null);
 
   const agent = agents.find((item) => item.id === active) ?? agents[1];
 
@@ -69,6 +88,27 @@ export default function Home() {
 
   const updateLead = (key: keyof LeadFormData, value: string) =>
     setLeadForm((current) => ({ ...current, [key]: value }));
+
+  const updateICP = (key: keyof ICPRequestPayload, value: string) =>
+    setICPForm((current) => ({ ...current, [key]: value }));
+
+  /**
+   * Auto-fill Lead Management form from ICP results
+   */
+  const autofillLeadFormFromICP = (icpResponse: ICPRecommendationResponse) => {
+    const industry = extractRecommendedIndustries(icpResponse);
+    const region = extractTargetRegions(icpResponse);
+    const roles = extractBuyerRoles(icpResponse);
+    const companySize = estimateCompanySize(icpResponse);
+
+    setLeadForm((current) => ({
+      ...current,
+      ...(industry && { industry }),
+      ...(region && { region }),
+      ...(roles && { roles }),
+      ...(companySize && { company_size: companySize }),
+    }));
+  };
 
   const getLeadsFromResult = (result: AgentResult | null) => {
     if (!result) return [];
@@ -90,6 +130,10 @@ export default function Home() {
 
   const handleAgentSelect = (id: string) => {
     setActive(id);
+    // When selecting leads after ICP analysis, auto-fill the form
+    if (id === "leads" && icpResult) {
+      autofillLeadFormFromICP(icpResult);
+    }
   };
 
   const handleRunningChange = (isRunning: boolean) => {
@@ -148,13 +192,28 @@ export default function Home() {
                 </div>
               </div>
 
-              {manual && active === "leads" ? (
+              {manual && active === "icp" ? (
+                <div className="input-body">
+                  <ICPForm payload={icpForm} onChange={updateICP} />
+                </div>
+              ) : manual && active === "leads" ? (
                 <div className="input-body">
                   <LeadForm
                     values={leadForm}
                     onChange={updateLead}
                     payload={leadPayload}
                   />
+                  {icpResult && (
+                    <div className="upstream-note">
+                      <span>💡 Fields auto-filled from Strategy analysis</span>
+                      <button
+                        className="refill-btn"
+                        onClick={() => autofillLeadFormFromICP(icpResult)}
+                      >
+                        Refill from Strategy
+                      </button>
+                    </div>
+                  )}
                   <div className="input-footer">
                     <div className="source-drop">
                       <span className="source-icon">↑</span>
@@ -218,10 +277,20 @@ export default function Home() {
               <div className="card execution-card">
                 <AgentProgress
                   agentId={active}
+                  icpPayload={active === "icp" ? icpForm : undefined}
+                  icpFormData={active === "icp" ? icpForm : undefined}
                   payload={active === "leads" ? leadPayload : active === "outreach" ? outreachPayload : undefined}
                   onPrepareRun={active === "leads" ? createLeadPayloadForRun : undefined}
                   onRunningChange={handleRunningChange}
-                  onResult={(result) => { if (result.agentId === "leads") setLeadResult(result); }}
+                  onResult={(result) => {
+                    if (result.agentId === "leads") setLeadResult(result);
+                  }}
+                  onICPResult={(result) => {
+                    setICPResult(result);
+                    // Auto-switch to leads and fill form
+                    autofillLeadFormFromICP(result);
+                    setActive("leads");
+                  }}
                   onSendMailToLeads={openOutreach}
                   actionLabel={active === "outreach" ? `SEND EMAILS TO ${outreachLeads.length} LEAD${outreachLeads.length === 1 ? "" : "S"}` : undefined}
                   runDisabled={active === "outreach" && outreachLeads.length === 0}
@@ -391,6 +460,37 @@ export default function Home() {
         .status-note {
           font-size: 10px;
           color: var(--text-tertiary);
+        }
+
+        .upstream-note {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
+          margin-top: 16px;
+          padding: 10px 12px;
+          border-radius: var(--radius-sm);
+          background: rgba(168, 85, 247, 0.08);
+          border: 1px solid rgba(168, 85, 247, 0.2);
+          font-size: 11px;
+          color: var(--text-secondary);
+        }
+
+        .refill-btn {
+          padding: 5px 10px;
+          border-radius: 4px;
+          background: var(--violet-bright);
+          color: white;
+          border: none;
+          font-size: 10px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all var(--duration-fast) ease;
+          white-space: nowrap;
+        }
+
+        .refill-btn:hover {
+          filter: brightness(1.1);
         }
 
         /* Automatic mode */

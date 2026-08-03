@@ -19,12 +19,7 @@ export default function ProposalForm() {
     setErrorMessage('');
 
     try {
-      const webhookUrl = process.env.NEXT_PUBLIC_PROPOSAL_WEBHOOK_URL;
-      if (!webhookUrl) {
-        throw new Error('Proposal webhook URL not configured');
-      }
-
-      const response = await fetch(webhookUrl, {
+      const response = await fetch('/api/proposal/trigger', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

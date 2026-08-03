@@ -443,7 +443,7 @@ export class AgentRunner {
         this.handleStartError(error, 'leads');
       }
     }, POLLING_INTERVAL);
-
+  }
 
   private handleStreamEvent(event: import('./api-types').ApiStreamEvent): void {
     if (this.cancelled || !this.execution) return;

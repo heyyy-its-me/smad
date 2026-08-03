@@ -40,7 +40,10 @@ const WEBHOOK_URLS: Record<string, string | undefined> = {
   outreach: process.env.NEXT_PUBLIC_OUTREACH_WEBHOOK_URL,
 };
 
-const LEAD_MANAGEMENT_TIMEOUT_MS = 300000;
+// Timeout for initial webhook acknowledgement (30 seconds)
+const WEBHOOK_INITIAL_TIMEOUT_MS = 30000;
+// Maximum polling timeout (15 minutes for complex n8n workflows)
+const LEAD_MANAGEMENT_POLLING_TIMEOUT_MS = 900000;
 
 // Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ Response Schema Detection Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
@@ -317,7 +320,9 @@ export class N8nWebhookAdapter implements ExecutionAdapter {
   }
 
   private getTimeoutMs(agentId: string): number {
-    return agentId === 'leads' ? LEAD_MANAGEMENT_TIMEOUT_MS : this.timeoutMs;
+    // All webhook calls have a 30-second timeout for initial acknowledgement
+    // For lead agent, the actual processing happens asynchronously and we poll for results
+    return agentId === 'leads' ? WEBHOOK_INITIAL_TIMEOUT_MS : WEBHOOK_INITIAL_TIMEOUT_MS;
   }
 
   /**

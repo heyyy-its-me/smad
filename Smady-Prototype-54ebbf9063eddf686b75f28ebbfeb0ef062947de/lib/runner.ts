@@ -207,6 +207,11 @@ export class AgentRunner {
       const isSynchronous = adapter === n8nWebhookAdapter && response.status !== 'running';
       return this.handleExecutionResponse(response, placeholderExecution, agentId, isSynchronous, isN8nWebhook);
     } catch (error) {
+      // For lead agent, try to extract request ID and continue polling even on webhook timeout
+      if (agentId === 'leads' && typeof payload?.request_id === 'string') {
+        const requestId = payload.request_id;
+        return this.handleStartErrorWithFallbackPolling(error, agentId, requestId);
+      }
       return this.handleStartError(error, agentId);
     }
   }
@@ -377,14 +382,31 @@ export class AgentRunner {
 
   private startPollingForLeads(requestId: string): void {
     this.log('info', `Workflow acknowledged. Polling for results for request ID: ${requestId}`);
+    this.log('info', 'This may take 10-15 minutes depending on workflow complexity...');
 
     if (this.poller) {
       clearInterval(this.poller);
     }
 
+    const startPollingTime = Date.now();
+    const POLLING_TIMEOUT = 900000; // 15 minutes max polling time
+    const POLLING_INTERVAL = 3000; // Poll every 3 seconds
+
     this.poller = setInterval(async () => {
       if (this.cancelled) {
         if (this.poller) clearInterval(this.poller);
+        return;
+      }
+
+      // Check if we've exceeded the polling timeout
+      const elapsedTime = Date.now() - startPollingTime;
+      if (elapsedTime > POLLING_TIMEOUT) {
+        this.log('error', 'Polling timeout: Lead generation took longer than 15 minutes');
+        if (this.poller) clearInterval(this.poller);
+        this.handleStartError(
+          new Error('Lead generation workflow exceeded maximum wait time of 15 minutes'),
+          'leads'
+        );
         return;
       }
 
@@ -409,6 +431,9 @@ export class AgentRunner {
           this.log('error', `Polling result: Lead generation failed. Error: ${result.error}`);
           if (this.poller) clearInterval(this.poller);
           this.handleStartError(new Error(result.error ?? 'Lead generation failed in n8n'), 'leads');
+        } else if (result.status === 'processing') {
+          const elapsedSeconds = Math.round(elapsedTime / 1000);
+          this.log('info', `Still processing... (${elapsedSeconds}s elapsed)`);
         }
         // if status is 'processing', do nothing and wait for the next poll.
 
@@ -417,8 +442,7 @@ export class AgentRunner {
         if (this.poller) clearInterval(this.poller);
         this.handleStartError(error, 'leads');
       }
-    }, 5000); // Poll every 5 seconds
-  }
+    }, POLLING_INTERVAL);
 
 
   private handleStreamEvent(event: import('./api-types').ApiStreamEvent): void {
@@ -549,6 +573,53 @@ export class AgentRunner {
     return apiClient.baseUrl;
   }
 
+  private async handleStartErrorWithFallbackPolling(
+    error: unknown,
+    agentId: string,
+    requestId: string
+  ): Promise<AgentExecution> {
+    // For lead agent with a timeout error, try polling for results
+    // The workflow might have been triggered even if we got a timeout
+    if ((error as { name?: string })?.name === 'TimeoutError') {
+      this.log('warn', 'Webhook request timed out, but workflow may still be processing');
+      this.log('info', 'Continuing to poll for results from n8n...');
+      
+      // Update the execution with the request ID so polling can use it
+      if (this.execution && !this.execution.id.startsWith('connecting-')) {
+        this.execution.id = requestId;
+      }
+      
+      this.setExecutionState('running');
+      this.startPollingForLeads(requestId);
+      return this.execution || {
+        id: requestId,
+        agentId,
+        status: 'running',
+        nodes: [{
+          id: 'lead-management-workflow',
+          name: 'Lead Management workflow',
+          status: 'running',
+          duration: 0,
+          input: '',
+          output: '',
+          error: null,
+        }],
+        startTime: Date.now(),
+        endTime: null,
+        logs: [
+          {
+            timestamp: Date.now(),
+            level: 'warn',
+            message: 'Webhook connection timed out, but continuing to poll for results...',
+          },
+        ],
+      };
+    }
+
+    // For other errors, fall back to standard error handling
+    return this.handleStartError(error, agentId);
+  }
+
   private async handleStartError(error: unknown, agentId: string): Promise<AgentExecution> {
     let executionError: ExecutionError;
 
@@ -567,7 +638,7 @@ export class AgentRunner {
     } else if ((error as { name?: string })?.name === 'NetworkError' || error instanceof TypeError) {
       executionError = {
         type: 'network',
-        message: `Cannot reach the backend at ${this.getAdapterBaseUrl()}. Is the server running?`,
+        message: `Cannot reach the backend. Is the server running?`,
       };
     } else {
       executionError = {

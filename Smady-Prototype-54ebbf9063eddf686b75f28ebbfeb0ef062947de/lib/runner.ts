@@ -238,7 +238,7 @@ export class AgentRunner {
    */
   private isLeadAgentAcknowledgement(response: ApiExecutionResponse): boolean {
     return response.agentId === 'leads' &&
-      response.status === 'running' &&
+      (response.status === 'running' || response.status === 'processing') &&
       response.nodes.some(n => n.id === 'lead-management-workflow');
   }
   private async handleExecutionResponse(

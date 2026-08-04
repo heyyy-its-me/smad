@@ -94,11 +94,21 @@ function isWorkflowStartedAcknowledgement(raw: unknown): raw is Record<string, u
   if (typeof raw !== 'object' || raw === null || Array.isArray(raw)) return false;
 
   const response = raw as Record<string, unknown>;
-  return (
-    typeof response.message === 'string' &&
-    /^workflow was started\.?$/i.test(response.message.trim()) &&
-    typeof response.executionId !== 'string'
-  );
+  
+  // Check for n8n workflow trigger acknowledgement patterns:
+  // 1. status: 'processing' or 'running' (workflow is executing)
+  // 2. Explicit "workflow was started" message
+  // 3. executionId without error indicators
+  const isProcessingOrRunning = response.status === 'processing' || response.status === 'running';
+  
+  const hasStartMessage = typeof response.message === 'string' &&
+    /^(workflow was started|.*is.*processing)\.?$/i.test(response.message.trim());
+  
+  const hasExecutionIdWithoutError = 
+    typeof response.executionId === 'string' &&
+    !responseIndicatesFailure(response);
+
+  return isProcessingOrRunning || hasStartMessage || hasExecutionIdWithoutError;
 }
 
 function isFinalLeadManagementResponse(raw: unknown): raw is Record<string, unknown> {

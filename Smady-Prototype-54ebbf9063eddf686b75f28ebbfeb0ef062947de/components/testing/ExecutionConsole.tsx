@@ -133,6 +133,17 @@ export default function ExecutionConsole({
         </div>
       )}
 
+      {/* Success display */}
+      {isCompleted && !executionError && (
+        <div className="console-success">
+          <CheckCircle size={16} />
+          <div className="success-content">
+            <strong>Execution Completed Successfully</strong>
+            <p>Your lead generation workflow has finished. Check the Output tab to view results.</p>
+          </div>
+        </div>
+      )}
+
       {/* Logs */}
       <div className="console-logs">
         <div className="logs-header">
@@ -328,6 +339,31 @@ export default function ExecutionConsole({
           color: rgba(248,113,113,0.8);
           margin: 0;
           line-height: 1.5;
+        }
+
+        .console-success {
+          display: flex;
+          gap: 10px;
+          padding: 12px 14px;
+          border-radius: var(--radius-sm);
+          background: rgba(94,234,158,0.06);
+          border: 1px solid rgba(94,234,158,0.2);
+          color: var(--status-completed);
+        }
+        .console-success strong {
+          display: block;
+          font-size: 12px;
+          color: var(--status-completed);
+          margin-bottom: 3px;
+        }
+        .console-success p {
+          font-size: 10px;
+          color: rgba(94,234,158,0.8);
+          margin: 0;
+          line-height: 1.5;
+        }
+        .success-content {
+          flex: 1;
         }
 
         .console-logs {

@@ -422,15 +422,25 @@ export class AgentRunner {
         if (result.status === 'completed') {
           this.log('info', 'Polling successful: Lead generation completed.');
           if (this.poller) clearInterval(this.poller);
+          this.poller = null;
 
-          const finalResult = n8nWebhookAdapter.normalizeWebhookResponse(result, 'leads');
-          const finalExecution = await this.handleExecutionResponse(finalResult, this.execution!, 'leads', true, true);
-          this.execution = finalExecution;
+          try {
+            const finalResult = n8nWebhookAdapter.normalizeWebhookResponse(result, 'leads');
+            const finalExecution = await this.handleExecutionResponse(finalResult, this.execution!, 'leads', true, true);
+            this.execution = finalExecution;
+          } catch (handlerError) {
+            this.log('error', `Error handling completion response: ${(handlerError as Error).message}`);
+            this.handleStartError(handlerError, 'leads');
+          }
+          return;
 
         } else if (result.status === 'failed') {
           this.log('error', `Polling result: Lead generation failed. Error: ${result.error}`);
           if (this.poller) clearInterval(this.poller);
+          this.poller = null;
           this.handleStartError(new Error(result.error ?? 'Lead generation failed in n8n'), 'leads');
+          return;
+
         } else if (result.status === 'processing') {
           const elapsedSeconds = Math.round(elapsedTime / 1000);
           this.log('info', `Still processing... (${elapsedSeconds}s elapsed)`);
@@ -440,6 +450,7 @@ export class AgentRunner {
       } catch (error) {
         this.log('error', `Polling request failed: ${(error as Error).message}`);
         if (this.poller) clearInterval(this.poller);
+        this.poller = null;
         this.handleStartError(error, 'leads');
       }
     }, POLLING_INTERVAL);

@@ -139,6 +139,14 @@ export default function AgentProgress({
     }
   }, [agentId, payload]);
 
+  // Auto-switch to output view when leads complete
+  useEffect(() => {
+    if (execState === 'completed' && result && agentId === 'leads') {
+      // Auto-switch to output view to show leads table
+      setView('output');
+    }
+  }, [execState, result, agentId]);
+
   // Timer for elapsed time
   useEffect(() => {
     if (execution?.status === 'running') {

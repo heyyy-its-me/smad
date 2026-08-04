@@ -12,27 +12,61 @@ export default function ProposalForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim() || !email.trim()) return;
+    
+    // Validate inputs
+    if (!name.trim()) {
+      setErrorMessage('Please enter a name');
+      setStatus('error');
+      return;
+    }
+    
+    if (!email.trim()) {
+      setErrorMessage('Please enter an email address');
+      setStatus('error');
+      return;
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setErrorMessage('Please enter a valid email address');
+      setStatus('error');
+      return;
+    }
 
     setIsLoading(true);
     setStatus('idle');
     setErrorMessage('');
 
     try {
+      const payload = {
+        lead_name: name.trim(),
+        lead_email: email.trim(),
+        timestamp: new Date().toISOString(),
+      };
+
+      console.log('[ProposalForm] Submitting payload:', payload);
+      console.log('[ProposalForm] lead_name:', payload.lead_name, 'Type:', typeof payload.lead_name);
+      console.log('[ProposalForm] lead_email:', payload.lead_email, 'Type:', typeof payload.lead_email);
+
       const response = await fetch('/api/proposal/trigger', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          lead_name: name,
-          lead_email: email,
-          timestamp: new Date().toISOString(),
-        }),
+        headers: { 
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
       });
+
+      console.log('[ProposalForm] API response status:', response.status);
 
       if (!response.ok) {
         const errorText = await response.text();
+        console.error('[ProposalForm] API error response:', errorText);
         throw new Error(`Webhook error ${response.status}: ${errorText}`);
       }
+
+      const responseData = await response.json();
+      console.log('[ProposalForm] Success response:', responseData);
 
       setStatus('success');
       setTimeout(() => {
@@ -42,6 +76,7 @@ export default function ProposalForm() {
       }, 3000);
     } catch (error) {
       const msg = error instanceof Error ? error.message : 'Unknown error';
+      console.error('[ProposalForm] Error:', msg);
       setErrorMessage(msg);
       setStatus('error');
     } finally {

@@ -345,16 +345,21 @@ export default function Home() {
 
         /* Input panel */
         .input-panel {
-          overflow: hidden;
-          max-height: 650px;
+          display: flex;
+          flex-direction: column;
+          height: 480px;
+          border: 1px solid var(--border-subtle);
+          border-radius: var(--radius-md);
+          background: var(--bg-secondary);
         }
 
         .input-panel-header {
           display: flex;
           align-items: center;
           justify-content: space-between;
-          padding: 18px 20px;
+          padding: 16px 18px;
           border-bottom: 1px solid var(--border-subtle);
+          flex-shrink: 0;
         }
 
         .input-panel-title {
@@ -413,7 +418,9 @@ export default function Home() {
         }
 
         .input-body {
-          padding: 20px;
+          padding: 16px 18px;
+          overflow-y: auto;
+          flex: 1;
         }
 
         .input-footer {
@@ -462,9 +469,10 @@ export default function Home() {
         }
 
         .input-status-bar {
-          padding: 12px 20px;
+          padding: 12px 18px;
           border-top: 1px solid var(--border-subtle);
           background: rgba(6, 11, 30, 0.3);
+          flex-shrink: 0;
         }
 
         .status-note {
@@ -562,16 +570,17 @@ export default function Home() {
         .execution-panel {
           display: flex;
           flex-direction: column;
-          gap: 10px;
-          max-height: 650px;
-          overflow-y: auto;
+          height: 480px;
+          border: 1px solid var(--border-subtle);
+          border-radius: var(--radius-md);
+          background: var(--bg-secondary);
         }
 
         .execution-label-bar {
           display: flex;
           align-items: center;
           justify-content: space-between;
-          padding: 0 4px;
+          padding: 16px 18px 0;
           font-size: 9px;
           font-family: var(--font-mono);
           font-weight: 700;
@@ -591,7 +600,9 @@ export default function Home() {
         }
 
         .execution-card {
-          padding: 20px;
+          padding: 16px 18px;
+          overflow-y: auto;
+          flex: 1;
         }
 
         /* Responsive */

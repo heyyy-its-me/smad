@@ -46,7 +46,7 @@ export interface ApiLogResponse {
 export interface ApiExecutionResponse {
   id: string;
   agentId: string;
-  status: 'idle' | 'running' | 'completed' | 'cancelled' | 'failed';
+  status: 'idle' | 'running' | 'processing' | 'completed' | 'cancelled' | 'failed';
   nodes: ApiNodeResponse[];
   startTime: number | null;
   endTime: number | null;

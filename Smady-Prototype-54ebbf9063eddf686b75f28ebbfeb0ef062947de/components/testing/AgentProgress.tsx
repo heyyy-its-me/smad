@@ -247,8 +247,8 @@ export default function AgentProgress({
         )}
       </div>
 
-      {/* View toggle when there's a result */}
-      {(result || icpResult) && !isRunning && execState !== 'running' && (
+      {/* View toggle when there's a result (NOT for completed leads) */}
+      {(result || icpResult) && !isRunning && execState !== 'running' && !(agentId === 'leads' && execState === 'completed') && (
         <div className="view-toggle">
           <button
             onClick={() => setView('console')}
@@ -265,6 +265,43 @@ export default function AgentProgress({
         </div>
       )}
 
+      {/* For leads agent on completion: show metrics + full table layout */}
+      {agentId === 'leads' && execState === 'completed' && result && (
+        <>
+          {/* Success metrics on right */}
+          <div className="leads-completion-card">
+            <div className="success-badge">
+              <div className="success-icon">✓</div>
+              <div className="success-text">
+                <h3>Lead Generation Complete</h3>
+                <div className="success-metrics">
+                  <div className="metric">
+                    <span className="metric-label">Total Leads Found</span>
+                    <span className="metric-value">{result.nodes[0]?.output ? (() => {
+                      try {
+                        const parsed = JSON.parse(result.nodes[0].output);
+                        const list = Array.isArray(parsed) ? parsed : parsed?.leads ?? parsed?.data ?? [];
+                        return Array.isArray(list) ? list.length : 0;
+                      } catch { return 0; }
+                    })() : 0}</span>
+                  </div>
+                  <div className="metric-divider" />
+                  <div className="metric">
+                    <span className="metric-label">Ready to Contact</span>
+                    <span className="metric-value qualified">—</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Full leads table below */}
+          <div className="leads-table-container">
+            <OutputViewer result={result} onSendMailToLeads={onSendMailToLeads} />
+          </div>
+        </>
+      )}
+
       {/* Execution Console */}
       {view === 'console' && (
         <div className="card execution-card">
@@ -278,7 +315,7 @@ export default function AgentProgress({
         </div>
       )}
 
-      {/* Output */}
+      {/* Output (for non-leads or non-completed) */}
       {view === 'output' && (
         <div className="card output-card">
           {agentId === 'icp' && icpResult ? (
@@ -375,6 +412,74 @@ export default function AgentProgress({
         }
         .idle-prompt strong {
           color: var(--violet-bright);
+        }
+        .leads-completion-card {
+          padding: 24px;
+          background: linear-gradient(135deg, rgba(74, 222, 128, 0.08) 0%, rgba(59, 130, 246, 0.06) 100%);
+          border: 1px solid rgba(74, 222, 128, 0.2);
+          border-radius: 16px;
+          display: flex;
+          align-items: center;
+          gap: 20px;
+        }
+        .success-badge {
+          display: flex;
+          align-items: center;
+          gap: 16px;
+          flex: 1;
+        }
+        .success-icon {
+          width: 56px;
+          height: 56px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 28px;
+          color: white;
+          flex-shrink: 0;
+          box-shadow: 0 8px 16px rgba(74, 222, 128, 0.3);
+        }
+        .success-text h3 {
+          font-size: 16px;
+          font-weight: 600;
+          color: var(--text-primary);
+          margin: 0 0 12px;
+        }
+        .success-metrics {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+        }
+        .metric {
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+        }
+        .metric-label {
+          font-size: 11px;
+          font-weight: 500;
+          color: var(--text-tertiary);
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+        .metric-value {
+          font-size: 18px;
+          font-weight: 600;
+          color: var(--text-primary);
+          font-family: var(--font-mono);
+        }
+        .metric-value.qualified {
+          color: var(--status-waiting);
+        }
+        .metric-divider {
+          width: 1px;
+          height: 32px;
+          background: rgba(255, 255, 255, 0.1);
+        }
+        .leads-table-container {
+          margin-top: 8px;
         }
       `}</style>
     </div>

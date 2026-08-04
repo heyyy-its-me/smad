@@ -249,8 +249,19 @@ export class AgentRunner {
     executionAlreadyStarted = false
   ): Promise<AgentExecution> {
     if (this.isLeadAgentAcknowledgement(response)) {
+      console.log('[RUNNER] Lead agent acknowledgement detected, starting polling for:', response.id);
+      // Clear any error state and set to running when we get acknowledgement
+      this.setExecutionState('running');
+      this.executionError = null;
       this.startPollingForLeads(response.id);
       this.execution = response;
+      this.emit({
+        type: 'execution-start',
+        executionId: response.id,
+        agentId: response.agentId,
+        timestamp: Date.now(),
+      });
+      this.log('info', 'Workflow acknowledged. Polling for results...');
       return response;
     }
     // Map API response to internal execution type

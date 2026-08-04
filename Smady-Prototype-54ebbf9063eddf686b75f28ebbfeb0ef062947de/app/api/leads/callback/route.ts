@@ -6,18 +6,11 @@
  * Expected payload:
  * {
  *   "request_id": "uuid-from-the-initial-trigger",
- *   "status": "completed",
+ *   "status": "completed" | "low_score" | "failed",
  *   "total_count": 48,
- *   "leads": [
- *     {
- *       "company_name": "ABC Logistics",
- *       "contact_name": "John Smith",
- *       "job_title": "Fleet Manager",
- *       "email": "john@abclogistics.com",
- *       "location": "Toronto, ON",
- *       "score": 92
- *     }
- *   ]
+ *   "leads": [...],
+ *   "reason": "optional reason for low_score status",
+ *   "message": "optional message to display to user"
  * }
  *
  * The frontend polls GET /api/leads/results/[requestId] to display these.
@@ -44,6 +37,18 @@ export async function POST(request: NextRequest) {
     const status = body.status as string | undefined;
     const leads = body.leads as Record<string, unknown>[] | undefined;
     const totalCount = body.total_count as number | undefined;
+
+    // Handle low-score status (leads filtered out)
+    if (status === 'low_score') {
+      const reason = body.reason as string | undefined;
+      const message = body.message as string | undefined;
+      failLeadResult(requestId, message ?? reason ?? 'Leads did not meet qualification threshold');
+      return NextResponse.json({ 
+        ok: true, 
+        status: 'low_score',
+        message: message ?? reason 
+      });
+    }
 
     if (status === 'failed' || status === 'error') {
       failLeadResult(requestId, body.error ?? 'Unknown error from n8n');

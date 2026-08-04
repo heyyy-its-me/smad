@@ -23,11 +23,14 @@ interface StoredLeadResult {
 const store = new Map<string, StoredLeadResult>();
 
 export function initLeadResult(requestId: string): void {
-  store.set(requestId, {
-    leads: [],
-    total_count: 0,
-    status: 'processing',
-  });
+  // Only initialize if not already present
+  if (!store.has(requestId)) {
+    store.set(requestId, {
+      leads: [],
+      total_count: 0,
+      status: 'processing',
+    });
+  }
 }
 
 export function updateLeadResult(

@@ -196,11 +196,26 @@ export class AgentRunner {
     }
 
     try {
+      // For leads agent, inject the callback URL so n8n knows where to POST results
+      let executionPayload = payload;
+      if (agentId === 'leads' && isN8nWebhook) {
+        const callbackUrl = typeof window !== 'undefined'
+          ? `${window.location.origin}/api/leads/callback`
+          : process.env.NEXT_PUBLIC_APP_URL
+            ? `${process.env.NEXT_PUBLIC_APP_URL}/api/leads/callback`
+            : 'http://localhost:3000/api/leads/callback';
+        
+        executionPayload = {
+          ...payload,
+          callback_url: callbackUrl,
+        };
+        this.log('info', `Callback URL configured: ${callbackUrl}`);
+      }
 
       // Call the adapter to start execution
       const response = await adapter.startExecution({
         agentId,
-        payload,
+        payload: executionPayload,
       });
 
       // A webhook acknowledgement is not completion when n8n responds immediately.

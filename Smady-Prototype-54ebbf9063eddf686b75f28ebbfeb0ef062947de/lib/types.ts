@@ -18,7 +18,7 @@ export interface AgentNode {
 export interface AgentExecution {
   id: string;
   agentId: string;
-  status: 'idle' | 'running' | 'completed' | 'cancelled' | 'failed';
+  status: 'idle' | 'running' | 'processing' | 'completed' | 'cancelled' | 'failed';
   nodes: AgentNode[];
   startTime: number | null;
   endTime: number | null;

@@ -166,14 +166,15 @@ export default function AgentProgress({
   }, [execution?.status]);
 
   const handleRun = useCallback(async () => {
+    // Always start by showing progress state
     setView('console');
     setExecState('running');
     setExecError(null);
+    onRunningChange?.(true);
 
     // Handle ICP agent differently - call API directly
     if (agentId === 'icp' && icpFormData) {
       try {
-        onRunningChange?.(true);
         const result = await requestICPRecommendation(icpFormData);
         setICPResult(result);
         setExecState(result.status === 'success' ? 'completed' : 'failed');
@@ -197,7 +198,8 @@ export default function AgentProgress({
       return;
     }
 
-    // Handle other agents via runner
+    // Handle other agents via runner - webhook + polling flow
+    // State stays 'running' until runner emits execution-complete or execution-error
     try {
       if (agentId === 'leads') {
         const payloadForRun = onPrepareRun?.() ?? payload;
@@ -205,8 +207,15 @@ export default function AgentProgress({
       } else {
         await runner.start(agentId, payload);
       }
-    } catch {
-      // handled via events
+    } catch (error) {
+      // On network/startup error, show failed state
+      const errorMsg = error instanceof Error ? error.message : 'Failed to start execution';
+      setExecError({
+        type: 'unknown',
+        message: errorMsg,
+      });
+      setExecState('failed');
+      onRunningChange?.(false);
     }
   }, [agentId, icpFormData, onPrepareRun, payload, onRunningChange, onICPResult]);
 
@@ -218,9 +227,12 @@ export default function AgentProgress({
 
   // Determine the run button state
   const runButtonState = (() => {
+    // STRICT logic: 'running' takes precedence until execution actually completes
+    // Only show 'failed' if we're not running AND execution failed
     if (execState === 'running') return 'running' as const;
     if (execState === 'completed') return 'completed' as const;
-    if (execState === 'failed' || execState === 'error') return 'failed' as const;
+    // Only show failed/error state when NOT running
+    if ((execState === 'failed' || execState === 'error') && !isRunning) return 'failed' as const;
     return 'idle' as const;
   })();
 
@@ -238,7 +250,7 @@ export default function AgentProgress({
           onRun={handleRun}
           onCancel={handleCancel}
           idleLabel={actionLabel}
-          disabled={runDisabled}
+          disabled={runDisabled || execState === 'running'}
         />
         {runButtonState === 'running' && (
           <span className="elapsed-timer">

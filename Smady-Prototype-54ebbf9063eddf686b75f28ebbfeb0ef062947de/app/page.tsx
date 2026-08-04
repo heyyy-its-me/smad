@@ -340,16 +340,13 @@ export default function Home() {
           display: grid;
           grid-template-columns: minmax(0, 1fr) 380px;
           gap: 20px;
-          align-items: stretch;
-          min-height: 100%;
+          align-items: start;
         }
 
         /* Input panel */
         .input-panel {
           overflow: hidden;
-          display: flex;
-          flex-direction: column;
-          height: 100%;
+          max-height: 650px;
         }
 
         .input-panel-header {
@@ -417,8 +414,6 @@ export default function Home() {
 
         .input-body {
           padding: 20px;
-          overflow-y: auto;
-          flex: 1;
         }
 
         .input-footer {
@@ -470,8 +465,6 @@ export default function Home() {
           padding: 12px 20px;
           border-top: 1px solid var(--border-subtle);
           background: rgba(6, 11, 30, 0.3);
-          flex-shrink: 0;
-          margin-top: auto;
         }
 
         .status-note {
@@ -520,7 +513,6 @@ export default function Home() {
           border-radius: var(--radius-md);
           border: 1px solid rgba(255, 255, 255, 0.2);
           background: rgba(255, 255, 255, 0.04);
-          flex-shrink: 0;
         }
 
         .auto-icon {
@@ -571,7 +563,7 @@ export default function Home() {
           display: flex;
           flex-direction: column;
           gap: 10px;
-          height: 100%;
+          max-height: 650px;
           overflow-y: auto;
         }
 
@@ -600,8 +592,6 @@ export default function Home() {
 
         .execution-card {
           padding: 20px;
-          flex: 1;
-          overflow-y: auto;
         }
 
         /* Responsive */

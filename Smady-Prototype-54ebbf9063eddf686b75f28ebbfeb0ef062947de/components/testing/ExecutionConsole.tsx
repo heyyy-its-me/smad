@@ -33,8 +33,11 @@ export default function ExecutionConsole({
   const [activeStepIndex, setActiveStepIndex] = useState(0);
 
   useEffect(() => {
-    logEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [logs.length]);
+    // Only auto-scroll when execution completes, not on every log update (which causes polling jank)
+    if (executionState === 'completed' || executionState === 'failed' || executionState === 'error') {
+      logEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [executionState]);
 
   useEffect(() => {
     if (executionState === 'running' || executionState === 'loading') {
@@ -120,8 +123,8 @@ export default function ExecutionConsole({
         </div>
       )}
 
-      {/* Error display */}
-      {executionError && (
+      {/* Error display - only show if there's an actual error */}
+      {executionError && (executionState === 'failed' || executionState === 'error') && (
         <div className="console-error">
           <XCircle size={14} />
           <div>

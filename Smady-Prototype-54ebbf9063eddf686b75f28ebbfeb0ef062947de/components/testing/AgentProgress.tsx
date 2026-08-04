@@ -106,6 +106,10 @@ export default function AgentProgress({
             logs: res.logs,
           });
           setExecState(res.success ? 'completed' : 'failed');
+          // Clear error when execution completes successfully
+          if (res.success) {
+            setExecError(null);
+          }
         }
         onRunningChange?.(false);
       }

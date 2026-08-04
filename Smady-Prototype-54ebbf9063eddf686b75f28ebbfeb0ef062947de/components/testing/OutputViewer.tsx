@@ -4,6 +4,18 @@ import { useEffect, useState } from 'react';
 import { ChevronDown, ChevronRight, FileText, Table2 } from 'lucide-react';
 import type { AgentResult } from '@/lib/types';
 
+// Configure which fields to display in the leads table
+const LEAD_TABLE_COLUMNS = [
+  { key: 'Company Name', label: 'Company', fallbacks: ['company_name', 'company'] },
+  { key: 'Contact Name', label: 'Contact', fallbacks: ['contact_name'] },
+  { key: 'Designation', label: 'Title', fallbacks: ['job_title', 'title'] },
+  { key: 'Industry', label: 'Industry', fallbacks: ['industry'] },
+  { key: 'Company Size', label: 'Size', fallbacks: [] },
+  { key: 'Location', label: 'Location', fallbacks: ['location', 'city'] },
+  { key: 'Country', label: 'Country', fallbacks: ['country'] },
+  { key: 'Lead Score', label: 'Score', fallbacks: ['score', 'priority_score', 'lead_score'] },
+];
+
 interface OutputViewerProps {
   result: AgentResult | null;
   onSendMailToLeads?: (result: AgentResult) => void;
@@ -24,6 +36,7 @@ interface Lead {
   Designation?: string;
   'Company Name'?: string;
   'Contact Name'?: string;
+  'Lead Score'?: number;
   lead_id?: string;
   [key: string]: unknown;
 }
@@ -49,7 +62,8 @@ function getLeads(output: string): Lead[] {
 function getScore(lead: Lead): number {
   return typeof lead.score === 'number' ? lead.score :
          typeof lead.priority_score === 'number' ? lead.priority_score :
-         typeof lead.lead_score === 'number' ? lead.lead_score : 0;
+         typeof lead.lead_score === 'number' ? lead.lead_score :
+         typeof lead['Lead Score'] === 'number' ? lead['Lead Score'] : 0;
 }
 
 function getPriority(score: number): { label: string; color: string } {
@@ -61,6 +75,22 @@ function getPriority(score: number): { label: string; color: string } {
 function getCompanyInitial(lead: Lead): string {
   const name = (lead.company_name ?? lead['Company Name'] ?? '') as string;
   return name ? name.charAt(0).toUpperCase() : '?';
+}
+
+function getFieldValue(lead: Lead, key: string, fallbacks: string[]): string {
+  // Check primary key
+  if (lead[key] !== undefined && lead[key] !== null) {
+    const val = lead[key];
+    return typeof val === 'number' ? String(val) : String(val);
+  }
+  // Check fallbacks
+  for (const fallback of fallbacks) {
+    if (lead[fallback] !== undefined && lead[fallback] !== null) {
+      const val = lead[fallback];
+      return typeof val === 'number' ? String(val) : String(val);
+    }
+  }
+  return '—';
 }
 
 export default function OutputViewer({ result, onSendMailToLeads }: OutputViewerProps) {
@@ -190,10 +220,9 @@ export default function OutputViewer({ result, onSendMailToLeads }: OutputViewer
             <thead>
               <tr>
                 <th style={{ width: 32 }}></th>
-                <th>Company</th>
-                <th>Contact</th>
-                <th>Title</th>
-                <th>Score</th>
+                {LEAD_TABLE_COLUMNS.map((col) => (
+                  <th key={col.key}>{col.label}</th>
+                ))}
                 <th>Outreach</th>
                 <th style={{ width: 24 }}></th>
               </tr>
@@ -208,17 +237,17 @@ export default function OutputViewer({ result, onSendMailToLeads }: OutputViewer
                 return (
                   <tr key={index}>
                     <td className="cell-initial">{getCompanyInitial(lead)}</td>
-                    <td className="cell-company">{lead.company_name ?? lead['Company Name'] ?? '—'}</td>
-                    <td className="cell-contact">{lead.contact_name ?? lead['Contact Name'] ?? '—'}</td>
-                    <td className="cell-title">{lead.job_title ?? lead.Designation ?? '—'}</td>
-                    <td className="cell-score">
-                      <span className="score-pill" style={{ background: priority.color + '18', color: priority.color, borderColor: priority.color + '30' }}>
-                        {score > 0 ? score : '—'}
-                      </span>
-                      <span className={`priority-tag ${priority.label.toLowerCase()}`}>
-                        {priority.label}
-                      </span>
-                    </td>
+                    {LEAD_TABLE_COLUMNS.map((col) => (
+                      <td key={col.key} className={`cell-${col.key.toLowerCase().replace(/\s+/g, '-')}`}>
+                        {col.key === 'Lead Score' ? (
+                          <span className="score-pill" style={{ background: priority.color + '18', color: priority.color, borderColor: priority.color + '30' }}>
+                            {score > 0 ? score : '—'}
+                          </span>
+                        ) : (
+                          getFieldValue(lead, col.key, col.fallbacks)
+                        )}
+                      </td>
+                    ))}
                     <td className="cell-outreach" title={outreach?.subject}>
                       <span className={`outreach-status ${outreach?.status ?? 'pending'}`}>
                         {outreach?.status === 'emailed' ? 'Emailed' : outreach?.status === 'failed' ? 'Failed' : 'Ready to send'}

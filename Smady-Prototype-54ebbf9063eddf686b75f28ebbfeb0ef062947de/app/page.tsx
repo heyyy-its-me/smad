@@ -10,6 +10,7 @@ import ICPForm from "@/components/testing/ICPForm";
 import MeetingForm from "@/components/testing/MeetingForm";
 import ProposalForm from "@/components/testing/ProposalForm";
 import AgentProgress from "@/components/testing/AgentProgress";
+import OutputViewer from "@/components/testing/OutputViewer";
 import PortalBackdrop from "@/components/testing/PortalBackdrop";
 import type { AgentResult } from "@/lib/types";
 import type { ICPRequestPayload, ICPRecommendationResponse } from "@/lib/icp-api-client";
@@ -307,6 +308,13 @@ export default function Home() {
               </div>
             </div>
           </div>
+
+          {/* Leads table below both cards - ONLY for leads agent when completed */}
+          {active === "leads" && leadResult && (
+            <div className="leads-results-container">
+              <OutputViewer result={leadResult} onSendMailToLeads={openOutreach} />
+            </div>
+          )}
         </div>
       </div>
 
@@ -603,6 +611,15 @@ export default function Home() {
           padding: 16px 18px;
           overflow-y: auto;
           flex: 1;
+        }
+
+        /* Leads results container - below both cards */
+        .leads-results-container {
+          margin-top: 20px;
+          padding: 20px;
+          border: 1px solid var(--border-subtle);
+          border-radius: var(--radius-md);
+          background: var(--bg-secondary);
         }
 
         /* Responsive */

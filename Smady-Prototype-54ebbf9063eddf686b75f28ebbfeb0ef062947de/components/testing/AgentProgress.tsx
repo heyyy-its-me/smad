@@ -277,41 +277,33 @@ export default function AgentProgress({
         </div>
       )}
 
-      {/* For leads agent on completion: show metrics + full table layout */}
+      {/* For leads agent on completion: show metrics card only (table renders at page level) */}
       {agentId === 'leads' && execState === 'completed' && result && (
-        <>
-          {/* Success metrics on right */}
-          <div className="leads-completion-card">
-            <div className="success-badge">
-              <div className="success-icon">✓</div>
-              <div className="success-text">
-                <h3>Lead Generation Complete</h3>
-                <div className="success-metrics">
-                  <div className="metric">
-                    <span className="metric-label">Total Leads Found</span>
-                    <span className="metric-value">{result.nodes[0]?.output ? (() => {
-                      try {
-                        const parsed = JSON.parse(result.nodes[0].output);
-                        const list = Array.isArray(parsed) ? parsed : parsed?.leads ?? parsed?.data ?? [];
-                        return Array.isArray(list) ? list.length : 0;
-                      } catch { return 0; }
-                    })() : 0}</span>
-                  </div>
-                  <div className="metric-divider" />
-                  <div className="metric">
-                    <span className="metric-label">Ready to Contact</span>
-                    <span className="metric-value qualified">—</span>
-                  </div>
+        <div className="leads-completion-card">
+          <div className="success-badge">
+            <div className="success-icon">✓</div>
+            <div className="success-text">
+              <h3>Lead Generation Complete</h3>
+              <div className="success-metrics">
+                <div className="metric">
+                  <span className="metric-label">Total Leads Found</span>
+                  <span className="metric-value">{result.nodes[0]?.output ? (() => {
+                    try {
+                      const parsed = JSON.parse(result.nodes[0].output);
+                      const list = Array.isArray(parsed) ? parsed : parsed?.leads ?? parsed?.data ?? [];
+                      return Array.isArray(list) ? list.length : 0;
+                    } catch { return 0; }
+                  })() : 0}</span>
+                </div>
+                <div className="metric-divider" />
+                <div className="metric">
+                  <span className="metric-label">Ready to Contact</span>
+                  <span className="metric-value qualified">—</span>
                 </div>
               </div>
             </div>
           </div>
-
-          {/* Full leads table below */}
-          <div className="leads-table-container">
-            <OutputViewer result={result} onSendMailToLeads={onSendMailToLeads} />
-          </div>
-        </>
+        </div>
       )}
 
       {/* Execution Console */}
@@ -489,9 +481,6 @@ export default function AgentProgress({
           width: 1px;
           height: 32px;
           background: rgba(255, 255, 255, 0.1);
-        }
-        .leads-table-container {
-          margin-top: 8px;
         }
       `}</style>
     </div>

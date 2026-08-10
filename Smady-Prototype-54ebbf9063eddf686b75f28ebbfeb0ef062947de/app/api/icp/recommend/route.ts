@@ -2,8 +2,15 @@ export async function POST(request: Request) {
   const body = await request.json();
 
   try {
-    const icpApiUrl =
-      'https://icp-engine-api-env.eba-vbwk9qkm.eu-north-1.elasticbeanstalk.com/api/v1/recommend';
+    const configuredUrl =
+      process.env.ICP_API_RECOMMEND_URL ||
+      process.env.ICP_API_BASE_URL ||
+      process.env.NEXT_PUBLIC_ICP_API_BASE_URL ||
+      'https://icp-engine-api-env.eba-vbwk9qkm.eu-north-1.elasticbeanstalk.com';
+    const trimmedUrl = configuredUrl.trim().replace(/\/+$/, '');
+    const icpApiUrl = trimmedUrl.endsWith('/api/v1/recommend')
+      ? trimmedUrl
+      : `${trimmedUrl}/api/v1/recommend`;
 
     console.log('[ICP Proxy] Forwarding request to:', icpApiUrl);
     console.log('[ICP Proxy] Payload:', JSON.stringify(body));
@@ -36,6 +43,16 @@ export async function POST(request: Request) {
       return Response.json(data);
     } catch (fetchError) {
       clearTimeout(timeoutId);
+      if (fetchError instanceof Error) {
+        return Response.json(
+          {
+            error: 'Could not reach the ICP API. Check ICP_API_BASE_URL or ICP_API_RECOMMEND_URL.',
+            details: fetchError.message,
+            upstream: icpApiUrl,
+          },
+          { status: fetchError.name === 'AbortError' ? 504 : 502 }
+        );
+      }
       throw fetchError;
     }
   } catch (error) {

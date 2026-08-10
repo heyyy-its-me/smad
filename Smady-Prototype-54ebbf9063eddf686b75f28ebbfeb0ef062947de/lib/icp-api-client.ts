@@ -85,9 +85,10 @@ export async function requestICPRecommendation(
     process.env.NEXT_PUBLIC_ICP_API_BASE_URL ||
     'https://icp-engine-api-env.eba-vbwk9qkm.eu-north-1.elasticbeanstalk.com'
   ).trim().replace(/\/+$/, '');
-  const endpoint = apiBase.endsWith('/api/v1/recommend')
+  const directEndpoint = apiBase.endsWith('/api/v1/recommend')
     ? apiBase
     : `${apiBase}/api/v1/recommend`;
+  const proxyEndpoint = '/api/icp/recommend';
   const productDescription = payload.product_description.trim();
 
   if (!productDescription) {
@@ -105,30 +106,46 @@ export async function requestICPRecommendation(
     company_name: payload.company_name?.trim() || null,
     product_name: payload.product_name?.trim() || null,
   };
-  
+
   try {
-    const response = await fetch(endpoint, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(requestPayload),
-    });
+    return await postICPRecommendation(directEndpoint, requestPayload);
+  } catch (directError) {
+    const directMessage = directError instanceof Error ? directError.message : 'Unknown error';
 
-    if (!response.ok) {
-      const detail = (await response.text()).slice(0, 300);
-      throw new Error(`API returned ${response.status}: ${detail || response.statusText}`);
+    try {
+      return await postICPRecommendation(proxyEndpoint, requestPayload);
+    } catch (proxyError) {
+      const proxyMessage = proxyError instanceof Error ? proxyError.message : 'Unknown error';
+      throw new Error(
+        `ICP API request failed. Direct endpoint (${directEndpoint}): ${directMessage}. Proxy endpoint (${proxyEndpoint}): ${proxyMessage}`
+      );
     }
-
-    const data: ICPRecommendationResponse = await response.json();
-    if (data.status === 'error') {
-      throw new Error(data.message || 'The ICP engine returned an error.');
-    }
-    return data;
-  } catch (error) {
-    const message = error instanceof Error ? error.message : 'Unknown error';
-    throw new Error(`ICP API request failed: ${message}`);
   }
+}
+
+async function postICPRecommendation(
+  endpoint: string,
+  requestPayload: ICPRequestPayload
+): Promise<ICPRecommendationResponse> {
+  const response = await fetch(endpoint, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(requestPayload),
+  });
+
+  if (!response.ok) {
+    const detail = (await response.text()).slice(0, 300);
+    throw new Error(`API returned ${response.status}: ${detail || response.statusText}`);
+  }
+
+  const data: ICPRecommendationResponse = await response.json();
+  if (data.status === 'error') {
+    throw new Error(data.message || 'The ICP engine returned an error.');
+  }
+
+  return data;
 }
 
 /**

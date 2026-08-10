@@ -76,12 +76,18 @@ export function isPartialFailure(response: ICPRecommendationResponse): boolean {
 }
 
 /**
- * Make ICP recommendation request via local proxy (avoids CORS)
+ * Make ICP recommendation request.
  */
 export async function requestICPRecommendation(
   payload: ICPRequestPayload
 ): Promise<ICPRecommendationResponse> {
-  const endpoint = '/api/icp/recommend';
+  const apiBase = (
+    process.env.NEXT_PUBLIC_ICP_API_BASE_URL ||
+    'https://icp-engine-api-env.eba-vbwk9qkm.eu-north-1.elasticbeanstalk.com'
+  ).trim().replace(/\/+$/, '');
+  const endpoint = apiBase.endsWith('/api/v1/recommend')
+    ? apiBase
+    : `${apiBase}/api/v1/recommend`;
   const productDescription = payload.product_description.trim();
 
   if (!productDescription) {

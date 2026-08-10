@@ -10,8 +10,8 @@ export interface ICPRequestPayload {
   target_geography: string;
   business_stage: string;
   priority: string;
-  company_name?: string;
-  product_name?: string;
+  company_name?: string | null;
+  product_name?: string | null;
 }
 
 export interface AnalysisData {
@@ -82,6 +82,23 @@ export async function requestICPRecommendation(
   payload: ICPRequestPayload
 ): Promise<ICPRecommendationResponse> {
   const endpoint = '/api/icp/recommend';
+  const productDescription = payload.product_description.trim();
+
+  if (!productDescription) {
+    throw new Error('Product description is required.');
+  }
+
+  // Keep form labels unchanged and translate them at the API boundary.
+  const stage = payload.business_stage.trim().toLowerCase();
+  const businessStage = stage === 'mvp' ? 'MVP' : stage === 'mature' ? 'scale' : stage;
+  const requestPayload: ICPRequestPayload = {
+    product_description: productDescription,
+    target_geography: payload.target_geography.trim() || 'anywhere',
+    business_stage: businessStage || 'MVP',
+    priority: payload.priority.trim().toLowerCase() || 'high',
+    company_name: payload.company_name?.trim() || null,
+    product_name: payload.product_name?.trim() || null,
+  };
   
   try {
     const response = await fetch(endpoint, {
@@ -89,14 +106,18 @@ export async function requestICPRecommendation(
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(payload),
+      body: JSON.stringify(requestPayload),
     });
 
     if (!response.ok) {
-      throw new Error(`API returned ${response.status}: ${response.statusText}`);
+      const detail = (await response.text()).slice(0, 300);
+      throw new Error(`API returned ${response.status}: ${detail || response.statusText}`);
     }
 
     const data: ICPRecommendationResponse = await response.json();
+    if (data.status === 'error') {
+      throw new Error(data.message || 'The ICP engine returned an error.');
+    }
     return data;
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error';

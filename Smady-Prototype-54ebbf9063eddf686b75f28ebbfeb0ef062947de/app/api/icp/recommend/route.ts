@@ -26,7 +26,7 @@ export async function POST(request: Request) {
         const text = await response.text();
         console.log('[ICP Proxy] API returned error:', response.status, text);
         return Response.json(
-          { error: `ICP API error ${response.status}: ${text}` },
+          { error: `ICP API error ${response.status}: ${text.slice(0, 300)}` },
           { status: response.status }
         );
       }

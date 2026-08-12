@@ -34,8 +34,8 @@ type LeadFormData = {
 const initialLeadForm: LeadFormData = {
   industry: "Logistics & Supply Chain",
   roles: "Fleet Manager, Director of Operations",
-  region: "Canada",
-  cities: "Toronto",
+  region: "",
+  cities: "",
   states: "",
   company_size: "51-200",
   business_context: "",

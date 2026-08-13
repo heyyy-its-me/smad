@@ -14,6 +14,10 @@ export async function POST(request: NextRequest) {
     const organizationName = typeof body.organization_name === 'string' ? body.organization_name : undefined;
 
     const user = await createUser({ email, password, organization_name: organizationName });
+    if (!user || !user.id || !user.customer_id || !user.email) {
+      throw new Error('User creation failed: incomplete user data');
+    }
+
     const token = createJwt({ user_id: user.id, customer_id: user.customer_id, email: user.email });
 
     const response = NextResponse.json({

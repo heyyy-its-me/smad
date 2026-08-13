@@ -17,19 +17,16 @@ export async function POST(request: NextRequest) {
     }
 
     const user = await authenticateUser(email, password);
-    
     if (!user) {
       return NextResponse.json({ error: 'Invalid email or password' }, { status: 401 });
     }
 
-    if (!user.id || !user.customer_id) {
-      return NextResponse.json({ error: 'User data is incomplete' }, { status: 500 });
-    }
-
+    // Destructure to ensure TypeScript recognizes non-null values
+    const { id: userId, customer_id: customerId, email: userEmail } = user;
     const token = createJwt({ 
-      user_id: user.id, 
-      customer_id: user.customer_id, 
-      email: user.email || email 
+      user_id: userId, 
+      customer_id: customerId, 
+      email: userEmail || email 
     });
 
     const response = NextResponse.json({

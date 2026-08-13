@@ -28,6 +28,9 @@ export async function POST(request: NextRequest) {
     if (message === 'DUPLICATE_EMAIL') return NextResponse.json({ error: 'Email is already registered' }, { status: 409 });
     if (message === 'VALIDATION_EMAIL') return NextResponse.json({ error: 'Valid email is required' }, { status: 400 });
     if (message === 'VALIDATION_PASSWORD') return NextResponse.json({ error: 'Password must be at least 8 characters' }, { status: 400 });
+    if (message.startsWith('JWT_SECRET')) {
+      return NextResponse.json({ error: 'Authentication is not configured. Set JWT_SECRET and restart the app.' }, { status: 503 });
+    }
     console.error('[Auth Signup] Failed:', message);
     return NextResponse.json({ error: 'Signup failed' }, { status: 500 });
   }

@@ -32,6 +32,9 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error';
+    if (message.startsWith('JWT_SECRET')) {
+      return NextResponse.json({ error: 'Authentication is not configured. Set JWT_SECRET and restart the app.' }, { status: 503 });
+    }
     console.error('[Auth Login] Failed:', message);
     return NextResponse.json({ error: 'Login failed' }, { status: 500 });
   }

@@ -175,17 +175,30 @@ export default function AuthGate({ children }: { children: ReactNode }) {
             border-color: var(--violet);
           }
           .auth-submit {
-            height: 42px;
-            border: none;
-            border-radius: var(--radius-sm);
-            background: var(--violet-bright);
-            color: white;
-            font-weight: 700;
-            cursor: pointer;
+            height: 42px !important;
+            border: 1px solid rgba(139, 92, 246, 0.3) !important;
+            border-radius: var(--radius-sm) !important;
+            background: #0f0f23 !important;
+            color: #c0c0c0 !important;
+            font-weight: 700 !important;
+            font-size: 14px !important;
+            cursor: pointer !important;
+            transition: all 0.2s !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.05em !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            display: block !important;
+            width: 100% !important;
+          }
+          .auth-submit:hover:not(:disabled) {
+            background: #1a1a2e !important;
+            border-color: rgba(139, 92, 246, 0.6) !important;
+            color: #e5e7eb !important;
           }
           .auth-submit:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
+            opacity: 0.6 !important;
+            cursor: not-allowed !important;
           }
           .auth-switch {
             background: transparent;

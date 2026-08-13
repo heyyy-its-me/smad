@@ -5,26 +5,26 @@
 }
 
 :root {
-  /* Color palette - Dark professional theme */
-  --bg-primary: #0a0e27;
-  --bg-secondary: #12172d;
-  --bg-tertiary: #1a1f3a;
-  --bg-hover: #232d50;
+  /* Color palette - Pure dark professional theme */
+  --bg-primary: #0a0a0a;
+  --bg-secondary: #111111;
+  --bg-tertiary: #1a1a1a;
+  --bg-hover: #222222;
   
   /* Text colors */
-  --text-primary: #f3f4f6;
-  --text-secondary: #d1d5db;
-  --text-tertiary: #9ca3af;
+  --text-primary: #ffffff;
+  --text-secondary: #c0c0c0;
+  --text-tertiary: #a0a0a0;
   
   /* Borders */
-  --border-subtle: #374151;
-  --border-normal: #4b5563;
+  --border-subtle: #505050;
+  --border-normal: #404040;
   
   /* Accent colors */
-  --violet: #8b5cf6;
-  --violet-bright: #a78bfa;
-  --purple-dark: #6d28d9;
-  --purple-darker: #5b21b6;
+  --violet: #808080;
+  --violet-bright: #c0c0c0;
+  --purple-dark: #1a1a1a;
+  --purple-darker: #0a0a0a;
   
   /* Spacing system */
   --spacing-xs: 4px;

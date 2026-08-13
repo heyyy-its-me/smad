@@ -109,7 +109,24 @@ export default function AuthGate({ children }: { children: ReactNode }) {
 
           {error && <div className="auth-error">{error}</div>}
 
-          <button className="auth-submit" disabled={submitting} type="submit">
+          <button 
+            className="auth-submit" 
+            disabled={submitting} 
+            type="submit"
+            style={{
+              height: '42px',
+              border: '1px solid rgba(139, 92, 246, 0.3)',
+              borderRadius: '6px',
+              background: '#0f0f23',
+              color: '#c0c0c0',
+              fontWeight: 700,
+              fontSize: '14px',
+              cursor: 'pointer',
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em',
+              opacity: submitting ? 0.6 : 1,
+            }}
+          >
             {submitting ? 'Please wait...' : mode === 'login' ? 'Login' : 'Sign up'}
           </button>
 
@@ -124,20 +141,20 @@ export default function AuthGate({ children }: { children: ReactNode }) {
             display: grid;
             place-items: center;
             padding: 24px;
-            background: #0f0f23;
+            background: #0a0a0a;
           }
           .auth-card {
             width: min(420px, 100%);
             padding: 28px;
-            border: 1px solid rgba(139, 92, 246, 0.2);
+            border: 1px solid #404040;
             border-radius: 8px;
-            background: #1a1a2e;
+            background: #111111;
             display: flex;
             flex-direction: column;
             gap: 14px;
           }
           .auth-kicker {
-            color: #a78bfa;
+            color: #c0c0c0;
             font-family: monospace;
             font-size: 11px;
             font-weight: 700;
@@ -145,13 +162,13 @@ export default function AuthGate({ children }: { children: ReactNode }) {
           }
           h1 {
             margin: 0;
-            color: #f3f4f6;
+            color: #ffffff;
             font-size: 24px;
             font-weight: 700;
           }
           p {
             margin: 0 0 8px;
-            color: #9ca3af;
+            color: #a0a0a0;
             font-size: 13px;
             line-height: 1.5;
           }
@@ -159,62 +176,66 @@ export default function AuthGate({ children }: { children: ReactNode }) {
             display: flex;
             flex-direction: column;
             gap: 6px;
-            color: #d1d5db;
+            color: #c0c0c0;
             font-size: 12px;
             font-weight: 600;
           }
           input {
             height: 40px;
             border-radius: 6px;
-            border: 1px solid rgba(139, 92, 246, 0.4);
-            background: rgba(6, 11, 30, 0.4);
-            color: #f3f4f6;
+            border: 1px solid #404040;
+            background: #1a1a1a;
+            color: #e0e0e0;
             padding: 0 12px;
             outline: none;
             font-size: 14px;
             transition: all 0.2s;
           }
           input:focus {
-            border-color: rgba(139, 92, 246, 0.8);
-            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+            border-color: #606060;
+            background: #222222;
           }
-          .auth-submit {
-            height: 42px;
-            border: 1px solid rgba(139, 92, 246, 0.3);
-            border-radius: 6px;
-            background: #0f0f23;
-            color: #c0c0c0;
-            font-weight: 700;
-            font-size: 14px;
-            cursor: pointer;
-            transition: all 0.2s;
+          button.auth-submit {
+            height: 42px !important;
+            border: 1px solid #404040 !important;
+            border-radius: 6px !important;
+            background: #0a0a0a !important;
+            color: #c0c0c0 !important;
+            font-weight: 700 !important;
+            font-size: 14px !important;
+            cursor: pointer !important;
+            transition: all 0.2s !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.05em !important;
+            padding: 0 !important;
+            margin: 0 !important;
           }
-          .auth-submit:hover:not(:disabled) {
-            background: #1a1a2e;
-            border-color: rgba(139, 92, 246, 0.6);
-            color: #e5e7eb;
+          button.auth-submit:hover:not(:disabled) {
+            background: #1a1a1a !important;
+            border-color: #606060 !important;
+            color: #e0e0e0 !important;
           }
-          .auth-submit:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
+          button.auth-submit:disabled {
+            opacity: 0.6 !important;
+            cursor: not-allowed !important;
           }
           .auth-switch {
             background: transparent;
             border: none;
-            color: #9ca3af;
+            color: #a0a0a0;
             cursor: pointer;
             font-size: 12px;
             transition: color 0.2s;
           }
           .auth-switch:hover {
-            color: #d1d5db;
+            color: #c0c0c0;
           }
           .auth-error {
             padding: 10px 12px;
-            border: 1px solid rgba(239, 68, 68, 0.3);
+            border: 1px solid #663333;
             border-radius: 6px;
-            background: rgba(239, 68, 68, 0.08);
-            color: #fca5a5;
+            background: #331111;
+            color: #ff8080;
             font-size: 12px;
           }
         `}</style>

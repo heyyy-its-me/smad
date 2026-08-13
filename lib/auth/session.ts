@@ -1,24 +1,29 @@
-import { cookies } from 'next/headers';
 import type { NextRequest } from 'next/server';
 import { verifyJwt } from './jwt';
 import type { AuthSession } from './types';
 
-export const AUTH_COOKIE_NAME = 'smady_session';
+export const AUTH_COOKIE_NAME = 'auth_token';
 
-export async function setAuthCookie(token: string): Promise<void> {
-  const cookieStore = await cookies();
-  cookieStore.set(AUTH_COOKIE_NAME, token, {
-    httpOnly: true,
-    sameSite: 'lax',
-    secure: process.env.NODE_ENV === 'production',
-    path: '/',
-    maxAge: process.env.JWT_EXPIRES_IN_SECONDS ? Number(process.env.JWT_EXPIRES_IN_SECONDS) : 60 * 60 * 24 * 7,
-  });
+export function getAuthCookieHeaders(token: string): string {
+  const maxAge = 7 * 24 * 60 * 60; // 7 days in seconds
+  const isProduction = process.env.NODE_ENV === 'production';
+
+  const cookieFlags = [
+    `${AUTH_COOKIE_NAME}=${token}`,
+    `Max-Age=${maxAge}`,
+    'HttpOnly',
+    isProduction ? 'Secure' : '',
+    'SameSite=Strict',
+    'Path=/',
+  ]
+    .filter(Boolean)
+    .join('; ');
+
+  return cookieFlags;
 }
 
-export async function clearAuthCookie(): Promise<void> {
-  const cookieStore = await cookies();
-  cookieStore.delete(AUTH_COOKIE_NAME);
+export function clearAuthCookie(): string {
+  return `${AUTH_COOKIE_NAME}=; Max-Age=0; HttpOnly; SameSite=Strict; Path=/`;
 }
 
 export function getTokenFromRequest(request: NextRequest | Request): string | null {
@@ -31,7 +36,10 @@ export function getTokenFromRequest(request: NextRequest | Request): string | nu
 
   const cookieHeader = request.headers.get('cookie');
   if (!cookieHeader) return null;
-  const match = cookieHeader.split(';').map((item) => item.trim()).find((item) => item.startsWith(`${AUTH_COOKIE_NAME}=`));
+  const match = cookieHeader
+    .split(';')
+    .map((item) => item.trim())
+    .find((item) => item.startsWith(`${AUTH_COOKIE_NAME}=`));
   return match ? decodeURIComponent(match.slice(AUTH_COOKIE_NAME.length + 1)) : null;
 }
 

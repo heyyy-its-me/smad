@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { assertJwtConfigured, createJwt } from '@/lib/auth/jwt';
-import { setAuthCookie } from '@/lib/auth/session';
+import { getAuthCookieHeaders } from '@/lib/auth/session';
 import { authenticateUser } from '@/lib/auth/store';
 
 export const runtime = 'nodejs';
@@ -22,14 +22,16 @@ export async function POST(request: NextRequest) {
     }
 
     const token = createJwt({ user_id: user.id, customer_id: user.customer_id, email: user.email });
-    await setAuthCookie(token);
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       message: 'Login successful',
       user: { id: user.id, email: user.email, customer_id: user.customer_id },
       customer: { id: user.customer_id },
       token,
     });
+    response.headers.set('Set-Cookie', getAuthCookieHeaders(token));
+
+    return response;
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error';
     if (message.startsWith('JWT_SECRET')) {

@@ -1,10 +1,10 @@
 ﻿export function getAuthCookieHeaders(token: string): string {
-  const maxAge = 7 * 24 * 60 * 60;
+  const maxAge = 7 * 24 * 60 * 60; // 7 days in seconds
   const isProduction = process.env.NODE_ENV === 'production';
 
   const cookieFlags = [
-    uth_token=${token},
-    Max-Age=${maxAge},
+    `auth_token=${token}`,
+    `Max-Age=${maxAge}`,
     'HttpOnly',
     isProduction ? 'Secure' : '',
     'SameSite=Strict',

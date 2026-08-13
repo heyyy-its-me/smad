@@ -180,17 +180,19 @@ export default function AuthGate({ children }: { children: ReactNode }) {
           }
           .auth-submit {
             height: 42px;
-            border: none;
+            border: 1px solid rgba(139, 92, 246, 0.3);
             border-radius: 6px;
-            background: #6d28d9;
-            color: #f3f4f6;
+            background: #0f0f23;
+            color: #c0c0c0;
             font-weight: 700;
             font-size: 14px;
             cursor: pointer;
             transition: all 0.2s;
           }
           .auth-submit:hover:not(:disabled) {
-            background: #5b21b6;
+            background: #1a1a2e;
+            border-color: rgba(139, 92, 246, 0.6);
+            color: #e5e7eb;
           }
           .auth-submit:disabled {
             opacity: 0.6;

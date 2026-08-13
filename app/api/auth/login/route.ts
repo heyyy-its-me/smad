@@ -17,11 +17,20 @@ export async function POST(request: NextRequest) {
     }
 
     const user = await authenticateUser(email, password);
+    
     if (!user) {
       return NextResponse.json({ error: 'Invalid email or password' }, { status: 401 });
     }
 
-    const token = createJwt({ user_id: user.id, customer_id: user.customer_id, email: user.email });
+    if (!user.id || !user.customer_id) {
+      return NextResponse.json({ error: 'User data is incomplete' }, { status: 500 });
+    }
+
+    const token = createJwt({ 
+      user_id: user.id, 
+      customer_id: user.customer_id, 
+      email: user.email || email 
+    });
 
     const response = NextResponse.json({
       message: 'Login successful',

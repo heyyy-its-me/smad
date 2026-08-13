@@ -124,33 +124,34 @@ export default function AuthGate({ children }: { children: ReactNode }) {
             display: grid;
             place-items: center;
             padding: 24px;
-            background: var(--bg-primary);
+            background: #0f0f23;
           }
           .auth-card {
             width: min(420px, 100%);
             padding: 28px;
-            border: 1px solid var(--border-subtle);
-            border-radius: var(--radius-md);
-            background: var(--bg-secondary);
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            border-radius: 8px;
+            background: #1a1a2e;
             display: flex;
             flex-direction: column;
             gap: 14px;
           }
           .auth-kicker {
-            color: var(--violet-bright);
-            font-family: var(--font-mono);
+            color: #a78bfa;
+            font-family: monospace;
             font-size: 11px;
             font-weight: 700;
             letter-spacing: 0.08em;
           }
           h1 {
             margin: 0;
-            color: var(--text-primary);
+            color: #f3f4f6;
             font-size: 24px;
+            font-weight: 700;
           }
           p {
             margin: 0 0 8px;
-            color: var(--text-tertiary);
+            color: #9ca3af;
             font-size: 13px;
             line-height: 1.5;
           }
@@ -158,19 +159,20 @@ export default function AuthGate({ children }: { children: ReactNode }) {
             display: flex;
             flex-direction: column;
             gap: 6px;
-            color: var(--text-secondary);
+            color: #d1d5db;
             font-size: 12px;
             font-weight: 600;
           }
           input {
             height: 40px;
-            border-radius: var(--radius-sm);
+            border-radius: 6px;
             border: 1px solid rgba(139, 92, 246, 0.4);
             background: rgba(6, 11, 30, 0.4);
-            color: var(--text-primary);
+            color: #f3f4f6;
             padding: 0 12px;
             outline: none;
             font-size: 14px;
+            transition: all 0.2s;
           }
           input:focus {
             border-color: rgba(139, 92, 246, 0.8);
@@ -179,13 +181,13 @@ export default function AuthGate({ children }: { children: ReactNode }) {
           .auth-submit {
             height: 42px;
             border: none;
-            border-radius: var(--radius-sm);
+            border-radius: 6px;
             background: #6d28d9;
             color: #f3f4f6;
             font-weight: 700;
-            cursor: pointer;
             font-size: 14px;
-            transition: background 0.2s;
+            cursor: pointer;
+            transition: all 0.2s;
           }
           .auth-submit:hover:not(:disabled) {
             background: #5b21b6;
@@ -197,14 +199,18 @@ export default function AuthGate({ children }: { children: ReactNode }) {
           .auth-switch {
             background: transparent;
             border: none;
-            color: var(--text-tertiary);
+            color: #9ca3af;
             cursor: pointer;
             font-size: 12px;
+            transition: color 0.2s;
+          }
+          .auth-switch:hover {
+            color: #d1d5db;
           }
           .auth-error {
             padding: 10px 12px;
             border: 1px solid rgba(239, 68, 68, 0.3);
-            border-radius: var(--radius-sm);
+            border-radius: 6px;
             background: rgba(239, 68, 68, 0.08);
             color: #fca5a5;
             font-size: 12px;
@@ -231,10 +237,10 @@ export default function AuthGate({ children }: { children: ReactNode }) {
           align-items: center;
           gap: 10px;
           padding: 6px 8px 6px 12px;
-          border: 1px solid var(--border-subtle);
-          border-radius: var(--radius-sm);
+          border: 1px solid rgba(139, 92, 246, 0.2);
+          border-radius: 6px;
           background: rgba(6, 11, 30, 0.78);
-          color: var(--text-secondary);
+          color: #9ca3af;
           font-size: 11px;
           backdrop-filter: blur(10px);
         }
@@ -242,11 +248,15 @@ export default function AuthGate({ children }: { children: ReactNode }) {
           border: none;
           border-radius: 4px;
           padding: 5px 8px;
-          background: var(--bg-hover);
-          color: var(--text-primary);
+          background: rgba(139, 92, 246, 0.2);
+          color: #f3f4f6;
           cursor: pointer;
           font-size: 10px;
           font-weight: 700;
+          transition: background 0.2s;
+        }
+        .session-chip button:hover {
+          background: rgba(139, 92, 246, 0.4);
         }
       `}</style>
     </>

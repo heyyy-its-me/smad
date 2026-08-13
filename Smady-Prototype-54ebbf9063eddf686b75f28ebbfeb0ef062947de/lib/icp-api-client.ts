@@ -81,14 +81,7 @@ export function isPartialFailure(response: ICPRecommendationResponse): boolean {
 export async function requestICPRecommendation(
   payload: ICPRequestPayload
 ): Promise<ICPRecommendationResponse> {
-  const apiBase = (
-    process.env.NEXT_PUBLIC_ICP_API_BASE_URL ||
-    'https://icp-engine-api-env.eba-vbwk9qkm.eu-north-1.elasticbeanstalk.com'
-  ).trim().replace(/\/+$/, '');
-  const directEndpoint = apiBase.endsWith('/api/v1/recommend')
-    ? apiBase
-    : `${apiBase}/api/v1/recommend`;
-  const proxyEndpoint = '/api/icp/recommend';
+  const endpoint = '/api/icp/recommend';
   const productDescription = payload.product_description.trim();
 
   if (!productDescription) {
@@ -107,20 +100,7 @@ export async function requestICPRecommendation(
     product_name: payload.product_name?.trim() || null,
   };
 
-  try {
-    return await postICPRecommendation(directEndpoint, requestPayload);
-  } catch (directError) {
-    const directMessage = directError instanceof Error ? directError.message : 'Unknown error';
-
-    try {
-      return await postICPRecommendation(proxyEndpoint, requestPayload);
-    } catch (proxyError) {
-      const proxyMessage = proxyError instanceof Error ? proxyError.message : 'Unknown error';
-      throw new Error(
-        `ICP API request failed. Direct endpoint (${directEndpoint}): ${directMessage}. Proxy endpoint (${proxyEndpoint}): ${proxyMessage}`
-      );
-    }
-  }
+  return postICPRecommendation(endpoint, requestPayload);
 }
 
 async function postICPRecommendation(
@@ -170,11 +150,15 @@ export function extractRecommendedIndustries(response: ICPRecommendationResponse
 }
 
 /**
- * Extract target regions for geography field
+ * Extract target countries for Lead Management geography.
+ * Falls back to broad regions only when countries are not available.
  */
-export function extractTargetRegions(response: ICPRecommendationResponse): string {
-  if (!response.gtm_strategy?.target_regions?.length) return '';
-  return response.gtm_strategy.target_regions.join(', ');
+export function extractTargetCountries(response: ICPRecommendationResponse): string {
+  const countries = response.gtm_strategy?.target_countries ?? [];
+  if (countries.length > 0) return countries.join(', ');
+
+  const regions = response.gtm_strategy?.target_regions ?? [];
+  return regions.join(', ');
 }
 
 /**

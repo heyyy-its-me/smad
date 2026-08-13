@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
 const fs = require('fs');
 const path = 'components/testing/AgentProgress.tsx';
 let c = fs.readFileSync(path, 'utf8');

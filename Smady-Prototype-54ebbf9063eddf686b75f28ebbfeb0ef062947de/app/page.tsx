@@ -12,11 +12,12 @@ import ProposalForm from "@/components/testing/ProposalForm";
 import AgentProgress from "@/components/testing/AgentProgress";
 import OutputViewer from "@/components/testing/OutputViewer";
 import PortalBackdrop from "@/components/testing/PortalBackdrop";
+import AuthGate from "@/components/testing/AuthGate";
 import type { AgentResult } from "@/lib/types";
 import type { ICPRequestPayload, ICPRecommendationResponse } from "@/lib/icp-api-client";
 import {
   extractRecommendedIndustries,
-  extractTargetRegions,
+  extractTargetCountries,
   extractBuyerRoles,
   estimateCompanySize,
 } from "@/lib/icp-api-client";
@@ -56,11 +57,18 @@ const split = (value: string) =>
 const buildLeadPayload = (form: LeadFormData, requestId: string) => ({
   request_id: requestId,
   industry: split(form.industry),
+  target_industries: form.industry,
   roles: split(form.roles),
+  job_titles: form.roles,
   region: split(form.region),
+  priority_regions: form.region,
+  countries: split(form.region),
   cities: split(form.cities),
+  priority_cities: form.cities,
   states: split(form.states),
+  priority_states: form.states,
   company_size: split(form.company_size),
+  ideal_company_size: form.company_size,
   business_context: form.business_context,
 });
 
@@ -100,7 +108,7 @@ export default function Home() {
    */
   const autofillLeadFormFromICP = (icpResponse: ICPRecommendationResponse) => {
     const industry = extractRecommendedIndustries(icpResponse);
-    const region = extractTargetRegions(icpResponse);
+    const region = extractTargetCountries(icpResponse);
     const roles = extractBuyerRoles(icpResponse);
     const companySize = estimateCompanySize(icpResponse);
 
@@ -145,7 +153,8 @@ export default function Home() {
   };
 
   return (
-    <div className="app-shell">
+    <AuthGate>
+      <div className="app-shell">
       <PortalBackdrop />
       <Sidebar activeView={sidebarView} onViewChange={setSidebarView} />
 
@@ -653,6 +662,6 @@ export default function Home() {
         }
       `}</style>
     </div>
+    </AuthGate>
   );
 }
-

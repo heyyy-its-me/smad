@@ -1,34 +1,26 @@
-/**
- * GET /api/leads/results/[requestId]
- *
- * Polling endpoint for the frontend to retrieve Lead Management results
- * after n8n has finished processing and POSTed them to /api/leads/callback.
- *
- * Response:
- * - 200 with lead data when completed
- * - 200 with { status: 'processing' } while n8n is still working
- * - 200 with { status: 'failed', error: '...' } on failure
- * - 404 if request_id not found
- */
-
 import { NextRequest, NextResponse } from 'next/server';
+import { requireAuth } from '@/lib/auth/session';
 import { getLeadResult, initLeadResult } from '@/lib/lead-store';
 
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ requestId: string }> }
 ) {
+  let auth;
+  try {
+    auth = requireAuth(request);
+  } catch {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   const { requestId } = await params;
 
   if (!requestId || typeof requestId !== 'string') {
     return NextResponse.json({ error: 'Missing request_id' }, { status: 400 });
   }
 
-  // Initialize the tracking entry — this handles the case where the
-  // frontend polls before n8n has posted the callback.
-  initLeadResult(requestId);
-
-  const result = getLeadResult(requestId);
+  initLeadResult(requestId, { customer_id: auth.customer_id, user_id: auth.user_id });
+  const result = getLeadResult(requestId, auth.customer_id);
 
   if (!result) {
     return NextResponse.json(
@@ -53,7 +45,6 @@ export async function GET(
     });
   }
 
-  // Completed
   return NextResponse.json({
     status: 'completed',
     request_id: requestId,
@@ -62,4 +53,3 @@ export async function GET(
     completed_at: result.completedAt,
   });
 }
-

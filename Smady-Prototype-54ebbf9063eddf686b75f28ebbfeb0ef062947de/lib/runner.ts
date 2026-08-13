@@ -1,5 +1,5 @@
-﻿﻿/**
- * Agent Runner â€“ production-ready event-driven execution engine.
+/**
+ * Agent Runner ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Å“ production-ready event-driven execution engine.
  *
  * Orchestrates agent execution via n8n webhooks or the REST+SSE API client
  * while maintaining the same event-driven interface that UI components
@@ -11,7 +11,7 @@
  *   - Lifecycle (start, cancel, dispose)
  *
  * UI components subscribe to RunnerEvent via on() and receive the
- * exact same event shapes they did with the mock engine â€” no UI
+ * exact same event shapes they did with the mock engine ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â no UI
  * changes needed.
  *
  * Adapter resolution:
@@ -190,35 +190,25 @@ export class AgentRunner {
         data: {
           timestamp: Date.now(),
           level: 'info',
-          message: 'Connecting to execution backend…',
+          message: 'Connecting to execution backend...',
         } as LogEntry,
       });
     }
 
     try {
-      // For leads agent, inject the callback URL so n8n knows where to POST results
-      let executionPayload = payload;
-      if (agentId === 'leads' && isN8nWebhook) {
-        const callbackUrl = typeof window !== 'undefined'
-          ? `${window.location.origin}/api/leads/callback`
-          : process.env.NEXT_PUBLIC_APP_URL
-            ? `${process.env.NEXT_PUBLIC_APP_URL}/api/leads/callback`
-            : 'http://localhost:3000/api/leads/callback';
-        
-        executionPayload = {
-          ...payload,
-          callback_url: callbackUrl,
-        };
-        this.log('info', `Callback URL configured: ${callbackUrl}`);
-      }
-
-      // Call the adapter to start execution
-      const response = await adapter.startExecution({
-        agentId,
-        payload: executionPayload,
+      const startResponse = await fetch('/api/agents/start', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ agentId, payload: payload ?? {} }),
       });
 
-      // A webhook acknowledgement is not completion when n8n responds immediately.
+      if (!startResponse.ok) {
+        const errorBody = await startResponse.text();
+        throw new Error(`Agent start failed (${startResponse.status}): ${errorBody}`);
+      }
+
+      const response = await startResponse.json() as ApiExecutionResponse;
+// A webhook acknowledgement is not completion when n8n responds immediately.
       const isSynchronous = adapter === n8nWebhookAdapter && response.status !== 'running';
       return this.handleExecutionResponse(response, placeholderExecution, agentId, isSynchronous, isN8nWebhook);
     } catch (error) {

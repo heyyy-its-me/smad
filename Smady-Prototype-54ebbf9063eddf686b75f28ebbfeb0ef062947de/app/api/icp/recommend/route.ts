@@ -1,4 +1,13 @@
+import { requireAuth } from '@/lib/auth/session';
+
 export async function POST(request: Request) {
+  let auth;
+  try {
+    auth = requireAuth(request);
+  } catch {
+    return Response.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   const body = await request.json();
 
   try {
@@ -23,7 +32,7 @@ export async function POST(request: Request) {
       const response = await fetch(icpApiUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
+        body: JSON.stringify({ ...body, customer_id: auth.customer_id, user_id: auth.user_id }),
         signal: controller.signal,
       });
 

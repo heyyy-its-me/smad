@@ -1,4 +1,13 @@
+import { requireAuth } from '@/lib/auth/session';
+
 export async function POST(request: Request) {
+  let auth;
+  try {
+    auth = requireAuth(request);
+  } catch {
+    return Response.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   try {
     const body = await request.json();
 
@@ -40,7 +49,7 @@ export async function POST(request: Request) {
     const response = await fetch(webhookUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
+      body: JSON.stringify({ ...body, customer_id: auth.customer_id, user_id: auth.user_id }),
     });
 
     const responseText = await response.text();

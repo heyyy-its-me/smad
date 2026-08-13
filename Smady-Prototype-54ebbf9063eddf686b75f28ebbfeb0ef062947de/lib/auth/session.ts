@@ -1,14 +1,14 @@
-export function getAuthCookieHeaders(token: string): string {
-  const maxAge = 7 * 24 * 60 * 60; // 7 days in seconds
+﻿export function getAuthCookieHeaders(token: string): string {
+  const maxAge = 7 * 24 * 60 * 60;
   const isProduction = process.env.NODE_ENV === 'production';
 
   const cookieFlags = [
-    `auth_token=${token}`,
-    `Max-Age=${maxAge}`,
+    uth_token=${token},
+    Max-Age=${maxAge},
     'HttpOnly',
     isProduction ? 'Secure' : '',
     'SameSite=Strict',
-    isProduction ? `Domain=.vercel.app` : '',
+    'Path=/',
   ]
     .filter(Boolean)
     .join('; ');

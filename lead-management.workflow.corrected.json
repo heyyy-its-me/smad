@@ -1,0 +1,1749 @@
+{
+    "nodes":  [
+                  {
+                      "parameters":  {
+                                         "method":  "POST",
+                                         "url":  "https://api.apify.com/v2/acts/microworlds~leads-finder/runs",
+                                         "sendHeaders":  true,
+                                         "headerParameters":  {
+                                                                  "parameters":  [
+                                                                                     {
+                                                                                         "name":  "Content-Type",
+                                                                                         "value":  "application/json"
+                                                                                     },
+                                                                                     {
+                                                                                         "name":  "Authorization",
+                                                                                         "value":  "Bearer {{ $env.APIFY_API_TOKEN }}"
+                                                                                     }
+                                                                                 ]
+                                                              },
+                                         "sendBody":  true,
+                                         "specifyBody":  "json",
+                                         "jsonBody":  "={{ JSON.stringify($json.apifyInput) }}",
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "id":  "014da09a-320c-429c-a143-43b4e3f52456",
+                      "name":  "Start Leads Finder",
+                      "type":  "n8n-nodes-base.httpRequest",
+                      "typeVersion":  4.4,
+                      "position":  [
+                                       7728,
+                                       4560
+                                   ]
+                  },
+                  {
+                      "parameters":  {
+                                         "assignments":  {
+                                                             "assignments":  [
+                                                                                 {
+                                                                                     "id":  "rid-1",
+                                                                                     "name":  "run_id",
+                                                                                     "value":  "={{ $json.data.id }}",
+                                                                                     "type":  "string"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "rid-2",
+                                                                                     "name":  "poll_attempts",
+                                                                                     "value":  0,
+                                                                                     "type":  "number"
+                                                                                 }
+                                                                             ]
+                                                         },
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "id":  "d210a2eb-680a-4892-8c9d-2e3e8cd2f799",
+                      "name":  "Store Run ID",
+                      "type":  "n8n-nodes-base.set",
+                      "typeVersion":  3.4,
+                      "position":  [
+                                       7936,
+                                       4560
+                                   ]
+                  },
+                  {
+                      "parameters":  {
+                                         "amount":  40
+                                     },
+                      "id":  "1f6c277e-30af-45a5-a952-dafa91e80bd7",
+                      "name":  "Wait Before Poll",
+                      "type":  "n8n-nodes-base.wait",
+                      "typeVersion":  1.1,
+                      "position":  [
+                                       8144,
+                                       4560
+                                   ],
+                      "webhookId":  "wait-leads-finder-001"
+                  },
+                  {
+                      "parameters":  {
+                                         "url":  "=https://api.apify.com/v2/actor-runs/{{ $(\u0027Store Run ID\u0027).item.json.run_id }}",
+                                         "sendHeaders":  true,
+                                         "headerParameters":  {
+                                                                  "parameters":  [
+                                                                                     {
+                                                                                         "name":  "Authorization",
+                                                                                         "value":  "Bearer {{ $env.APIFY_API_TOKEN }}"
+                                                                                     }
+                                                                                 ]
+                                                              },
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "id":  "bf982000-e8b6-4c2a-9067-90156aa99d32",
+                      "name":  "Check Run Status",
+                      "type":  "n8n-nodes-base.httpRequest",
+                      "typeVersion":  4.4,
+                      "position":  [
+                                       8352,
+                                       4560
+                                   ]
+                  },
+                  {
+                      "parameters":  {
+                                         "jsCode":  "const attempts = ($input.item.json.poll_attempts || 0) + 1;\nreturn [{ json: { ...$input.item.json, poll_attempts: attempts } }];"
+                                     },
+                      "id":  "a973d537-9cbb-42f5-b761-2b7dd6ea05cc",
+                      "name":  "Increment Poll Counter",
+                      "type":  "n8n-nodes-base.code",
+                      "typeVersion":  2,
+                      "position":  [
+                                       8544,
+                                       4560
+                                   ]
+                  },
+                  {
+                      "parameters":  {
+                                         "conditions":  {
+                                                            "options":  {
+                                                                            "caseSensitive":  true,
+                                                                            "leftValue":  "",
+                                                                            "typeValidation":  "strict",
+                                                                            "version":  3
+                                                                        },
+                                                            "conditions":  [
+                                                                               {
+                                                                                   "id":  "cond-succeeded",
+                                                                                   "leftValue":  "={{ $json.data.status }}",
+                                                                                   "rightValue":  "SUCCEEDED",
+                                                                                   "operator":  {
+                                                                                                    "type":  "string",
+                                                                                                    "operation":  "equals"
+                                                                                                }
+                                                                               }
+                                                                           ],
+                                                            "combinator":  "or"
+                                                        },
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "id":  "48b7827b-11e7-47c3-af9c-0266763e67f1",
+                      "name":  "Run Succeeded?",
+                      "type":  "n8n-nodes-base.if",
+                      "typeVersion":  2.3,
+                      "position":  [
+                                       8736,
+                                       4560
+                                   ]
+                  },
+                  {
+                      "parameters":  {
+                                         "conditions":  {
+                                                            "options":  {
+                                                                            "caseSensitive":  true,
+                                                                            "leftValue":  "",
+                                                                            "typeValidation":  "strict",
+                                                                            "version":  3
+                                                                        },
+                                                            "conditions":  [
+                                                                               {
+                                                                                   "id":  "cond-maxpolls",
+                                                                                   "leftValue":  "={{ $json.poll_attempts }}",
+                                                                                   "rightValue":  10,
+                                                                                   "operator":  {
+                                                                                                    "type":  "number",
+                                                                                                    "operation":  "gte"
+                                                                                                }
+                                                                               }
+                                                                           ],
+                                                            "combinator":  "or"
+                                                        },
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "id":  "3c811626-9ed1-47fb-b6f4-69566ec4077c",
+                      "name":  "Exceeded Max Polls?",
+                      "type":  "n8n-nodes-base.if",
+                      "typeVersion":  2.3,
+                      "position":  [
+                                       8992,
+                                       4656
+                                   ]
+                  },
+                  {
+                      "parameters":  {
+                                         "url":  "=https://api.apify.com/v2/actor-runs/{{ $(\u0027Store Run ID\u0027).item.json.run_id }}/dataset/items",
+                                         "sendHeaders":  true,
+                                         "headerParameters":  {
+                                                                  "parameters":  [
+                                                                                     {
+                                                                                         "name":  "Authorization",
+                                                                                         "value":  "Bearer {{ $env.APIFY_API_TOKEN }}"
+                                                                                     }
+                                                                                 ]
+                                                              },
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "id":  "c0667a7f-e60d-402b-a395-5f2548e4871a",
+                      "name":  "Get Leads Results",
+                      "type":  "n8n-nodes-base.httpRequest",
+                      "typeVersion":  4.4,
+                      "position":  [
+                                       8992,
+                                       4400
+                                   ]
+                  },
+                  {
+                      "parameters":  {
+                                         "jsCode":  "const items = $input.all();\nconst leads = [];\nconst requestId = $(\u0027Prepare Search Parameters\u0027).first().json.requestId;\nconst params = $(\u0027Prepare Search Parameters\u0027).first().json;\n\n// Ã¢â€â‚¬Ã¢â€â‚¬ ICP from Prepare Search Parameters Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬\nconst allowedIndustries = (params.industry       || \u0027\u0027).toLowerCase().split(\u0027,\u0027).map(x =\u003e x.trim()).filter(Boolean);\nconst allowedLocations  = (params.location       || \u0027\u0027).toLowerCase().split(\u0027,\u0027).map(x =\u003e x.trim()).filter(Boolean);\nconst allowedCities     = (params.priority_cities || \u0027\u0027).toLowerCase().split(\u0027,\u0027).map(x =\u003e x.trim()).filter(Boolean);\nconst allowedRoles      = (params.job_titles     || \u0027\u0027).toLowerCase().split(\u0027,\u0027).map(x =\u003e x.trim()).filter(Boolean);\n\n// Ã¢â€â‚¬Ã¢â€â‚¬ Free / personal email providers (merged: microworlds + pipelinelabs lists) Ã¢â€â‚¬Ã¢â€â‚¬\nconst freeProviders = [\n  \u0027gmail.com\u0027,\u0027yahoo.com\u0027,\u0027hotmail.com\u0027,\u0027outlook.com\u0027,\u0027icloud.com\u0027,\n  \u0027live.com\u0027,\u0027msn.com\u0027,\u0027yahoo.co.uk\u0027,\u0027yahoo.co.in\u0027,\u0027comcast.net\u0027,\u0027rr.com\u0027,\u0027cox.net\u0027,\n  \u0027fuse.net\u0027,\u0027daktel.com\u0027,\u0027prodigy.net.mx\u0027,\u0027euronet.nl\u0027,\u0027sapo.pt\u0027\n];\n\nfor (const item of items) {\n  const d = item.json;\n\n  // Ã¢â€â‚¬Ã¢â€â‚¬ Email validation Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬\n  if (!d.email) continue;\n  const emailDomain = (d.email.split(\u0027@\u0027)[1] || \u0027\u0027).toLowerCase();\n  if (freeProviders.includes(emailDomain)) continue;\n  // pipelinelabs actor flags low-confidence pattern-matched emails\n  if (d.emailStatus === \u0027pattern_match\u0027) continue;\n\n  // Ã¢â€â‚¬Ã¢â€â‚¬ Name (supports microworlds: first_name/last_name/full_name, and pipelinelabs: firstName/lastName/fullName) Ã¢â€â‚¬Ã¢â€â‚¬\n  const fullName = d.full_name || d.fullName ||\n    ((d.first_name || d.firstName || \u0027\u0027) + \u0027 \u0027 + (d.last_name || d.lastName || \u0027\u0027)).trim() || \u0027N/A\u0027;\n\n  // Ã¢â€â‚¬Ã¢â€â‚¬ Job title (both actors use \u0027title\u0027; microworlds also has \u0027job_title\u0027) Ã¢â€â‚¬Ã¢â€â‚¬\n  const jobTitleRaw = d.title || d.job_title || \u0027N/A\u0027;\n\n  // Ã¢â€â‚¬Ã¢â€â‚¬ Website Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬\n  let website = d.organization_website_url || d.company_website || d.company_domain || d.companyDomain || \u0027\u0027;\n  if (website \u0026\u0026 !website.startsWith(\u0027http\u0027)) website = \u0027https://\u0027 + website;\n\n  // Ã¢â€â‚¬Ã¢â€â‚¬ Location (microworlds: city/state/country, pipelinelabs: personCity/companyCity etc.) Ã¢â€â‚¬Ã¢â€â‚¬\n  const city    = d.city    || d.personCity    || d.companyCity    || \u0027\u0027;\n  const state   = d.state   || d.personState   || d.companyState   || \u0027\u0027;\n  const country = d.country || d.personCountry || d.companyCountry || \u0027\u0027;\n  const location = [city, state].filter(Boolean).join(\u0027, \u0027) || \u0027N/A\u0027;\n  const countryName = country || \u0027N/A\u0027;\n\n  // Ã¢â€â‚¬Ã¢â€â‚¬ Industry (microworlds: string, pipelinelabs: companyIndustry array) Ã¢â€â‚¬Ã¢â€â‚¬\n  const industryRaw = d.organization_industry || d.industry || d.companyIndustry || \u0027N/A\u0027;\n  const industry = Array.isArray(industryRaw) ? industryRaw.join(\u0027, \u0027) : industryRaw;\n\n  // Ã¢â€â‚¬Ã¢â€â‚¬ Company size Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬\n  const companySize = d.organization_employee_count\n    ? String(d.organization_employee_count)\n    : (d.company_size || d.companySizeRange || (d.companySize ? d.companySize + \u0027 employees\u0027 : \u0027N/A\u0027));\n\n  // Ã¢â€â‚¬Ã¢â€â‚¬ Technologies (both actors return arrays under different keys) Ã¢â€â‚¬Ã¢â€â‚¬\n  const techArr = d.organization_technologies || d.company_technologies || d.technologies;\n  const techStr = Array.isArray(techArr)\n    ? techArr.slice(0, 6).join(\u0027, \u0027)\n    : (techArr || \u0027\u0027);\n\n  // Ã¢â€â‚¬Ã¢â€â‚¬ Specialties (pipelinelabs only) Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬\n  const specsArr = d.companySpecialties;\n  const specsStr = Array.isArray(specsArr) ? specsArr.slice(0, 4).join(\u0027, \u0027) : (specsArr || \u0027\u0027);\n\n  // Ã¢â€â‚¬Ã¢â€â‚¬ AI Insight Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬\n  const desc = (d.organization_short_description || d.company_description || d.companyDescription || \u0027\u0027).substring(0, 200);\n  const aiInsight = [\n    desc    ? \u0027About: \u0027 + desc    : \u0027\u0027,\n    techStr ? \u0027Tech: \u0027  + techStr : \u0027\u0027,\n    specsStr ? \u0027Focus: \u0027 + specsStr : \u0027\u0027\n  ].filter(Boolean).join(\u0027 | \u0027);\n\n  // Ã¢â€â‚¬Ã¢â€â‚¬ Research / enrichment fields Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬\n  const phone = d.organization_primary_phone || d.mobile_number || \u0027\u0027;\n\n  const employees = d.organization_employee_count\n    ? String(d.organization_employee_count)\n    : (d.company_size || d.companySizeRange || d.companySize || \u0027\u0027);\n\n  const annualRevenueRaw = d.organization_annual_revenue || d.company_annual_revenue || d.annualRevenue || \u0027\u0027;\n  const annualRevenue = annualRevenueRaw\n    ? (isNaN(Number(annualRevenueRaw)) ? String(annualRevenueRaw) : \u0027$\u0027 + Number(annualRevenueRaw).toLocaleString())\n    : \u0027\u0027;\n\n  const totalFunding = d.organization_total_funding_printed || \u0027\u0027;\n\n  const foundedYear = d.organization_founded_year\n    ? String(d.organization_founded_year)\n    : (d.company_founded_year ? String(d.company_founded_year) : (d.foundedYear ? String(d.foundedYear) : \u0027\u0027));\n\n  const fundingStage = d.organization_latest_funding_stage || d.fundingStage || \u0027\u0027;\n\n  const companyLinkedin = d.organization_linkedin_url || d.company_linkedin || d.companyLinkedinUrl || \u0027\u0027;\n\n  // Ã¢â€â‚¬Ã¢â€â‚¬ ICP scoring Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬\n  const companyIndustry = industry.toLowerCase();\n  const companyLocation = (location + \u0027 \u0027 + countryName).toLowerCase();\n  const jobTitle        = (jobTitleRaw || \u0027\u0027).toLowerCase();\n\n  const industryMatch = allowedIndustries.length === 0 ||\n    allowedIndustries.some(i =\u003e i \u0026\u0026 companyIndustry.includes(i));\n  const locationMatch =\n    (allowedCities.length \u003e 0   \u0026\u0026 allowedCities.some(c =\u003e c \u0026\u0026 companyLocation.includes(c)))   ||\n    (allowedLocations.length \u003e 0 \u0026\u0026 allowedLocations.some(l =\u003e l \u0026\u0026 companyLocation.includes(l)));\n  const roleMatch = allowedRoles.length === 0 ||\n    allowedRoles.some(r =\u003e r \u0026\u0026 jobTitle.includes(r));\n\n  let score = 0;\n  if (industryMatch) score++;\n  if (locationMatch) score++;\n  if (roleMatch)     score++;\n\n  let icpMatch = \u0027No Match\u0027;\n  if (score === 3)      icpMatch = \u0027Primary\u0027;\n  else if (score === 2) icpMatch = \u0027Secondary\u0027;\n  else if (score === 1) icpMatch = \u0027Tertiary\u0027;\n\n  if (score === 0) continue;\n\n  // Ã¢â€â‚¬Ã¢â€â‚¬ Output Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬\n  leads.push({\n    // Display (Google Sheets)\n    \u0027Lead ID\u0027:              d.email,\n    \u0027Company Name\u0027:         d.organization_name || d.company_name || d.companyName || \u0027N/A\u0027,\n    \u0027Industry\u0027:             industry,\n    \u0027Company Size\u0027:         companySize,\n    \u0027Location\u0027:             location,\n    \u0027Country\u0027:              countryName,\n    \u0027Contact Name\u0027:         fullName,\n    \u0027Designation\u0027:          jobTitleRaw,\n    \u0027Website\u0027:              website       || \u0027N/A\u0027,\n    \u0027Email\u0027:                d.email,\n    \u0027LinkedIn\u0027:             d.linkedin_url || d.linkedin || d.linkedinUrl || \u0027N/A\u0027,\n    \u0027Lead Source\u0027:          \u0027Apify Leads Finder\u0027,\n    \u0027ICP Match\u0027:            icpMatch,\n    \u0027Lead Score\u0027:           null,\n    \u0027Priority\u0027:             \u0027Pending\u0027,\n    \u0027Qualification Status\u0027: \u0027New\u0027,\n    \u0027AI Insight\u0027:           aiInsight,\n    \u0027lead_id\u0027:              d.email,\n    \u0027request_id\u0027:           requestId,\n\n    // snake_case for AI prompt + downstream\n    contact_name:           fullName,\n    job_title:              jobTitleRaw,\n    company_name:           d.organization_name || d.company_name || d.companyName || \u0027N/A\u0027,\n    company_size:           companySize,\n    industry:               industry,\n    location:               location,\n    country:                countryName,\n    email:                  d.email,\n    linkedin:               d.linkedin_url || d.linkedin || d.linkedinUrl || \u0027N/A\u0027,\n    email_status:           d.emailStatus || \u0027verified\u0027,\n\n    // Research / enrichment\n    phone:                  phone,\n    employees:              employees,\n    annual_revenue:         annualRevenue,\n    total_funding:          totalFunding,\n    founded_year:           foundedYear,\n    funding_stage:          fundingStage,\n    company_linkedin:       companyLinkedin,\n    specialties:            specsStr,\n    technologies:           techStr,\n    seniority:              d.seniority_level || d.seniority || \u0027\u0027,\n    company_description:    d.organization_short_description || d.company_description || d.companyDescription || \u0027\u0027\n  });\n}\n\nif (leads.length === 0) {\n  return [{ json: { _no_results: true, request_id: requestId } }];\n}\n\nreturn leads.map(lead =\u003e ({ json: lead }));"
+                                     },
+                      "id":  "aee06de7-39ef-491d-9dd3-efd47faa884d",
+                      "name":  "Filter \u0026 Clean Leads",
+                      "type":  "n8n-nodes-base.code",
+                      "typeVersion":  2,
+                      "position":  [
+                                       9536,
+                                       4256
+                                   ]
+                  },
+                  {
+                      "parameters":  {
+                                         "conditions":  {
+                                                            "options":  {
+                                                                            "caseSensitive":  false,
+                                                                            "leftValue":  "",
+                                                                            "typeValidation":  "loose",
+                                                                            "version":  3
+                                                                        },
+                                                            "conditions":  [
+                                                                               {
+                                                                                   "id":  "cond-noresults",
+                                                                                   "leftValue":  "={{ $json._no_results }}",
+                                                                                   "rightValue":  true,
+                                                                                   "operator":  {
+                                                                                                    "type":  "boolean",
+                                                                                                    "operation":  "notEquals"
+                                                                                                }
+                                                                               }
+                                                                           ],
+                                                            "combinator":  "and"
+                                                        },
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "id":  "eecc6d9d-982f-4097-8fd1-f8b0015873ac",
+                      "name":  "IF: Valid Lead",
+                      "type":  "n8n-nodes-base.if",
+                      "typeVersion":  2.3,
+                      "position":  [
+                                       10704,
+                                       4240
+                                   ]
+                  },
+                  {
+                      "parameters":  {
+                                         "assignments":  {
+                                                             "assignments":  [
+                                                                                 {
+                                                                                     "id":  "f-1",
+                                                                                     "name":  "Lead ID",
+                                                                                     "value":  "={{ $json[\u0027Lead ID\u0027] }}",
+                                                                                     "type":  "string"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "f-2",
+                                                                                     "name":  "Company Name",
+                                                                                     "value":  "={{ $json[\u0027Company Name\u0027] }}",
+                                                                                     "type":  "string"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "f-3",
+                                                                                     "name":  "Industry",
+                                                                                     "value":  "={{ $json[\u0027Industry\u0027] }}",
+                                                                                     "type":  "string"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "f-4",
+                                                                                     "name":  "Company Size",
+                                                                                     "value":  "={{ $json[\u0027Company Size\u0027] }}",
+                                                                                     "type":  "string"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "f-5",
+                                                                                     "name":  "Location",
+                                                                                     "value":  "={{ $json[\u0027Location\u0027] }}",
+                                                                                     "type":  "string"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "f-6",
+                                                                                     "name":  "Contact Name",
+                                                                                     "value":  "={{ $json[\u0027Contact Name\u0027] }}",
+                                                                                     "type":  "string"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "f-7",
+                                                                                     "name":  "Designation",
+                                                                                     "value":  "={{ $json[\u0027Designation\u0027] }}",
+                                                                                     "type":  "string"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "f-8",
+                                                                                     "name":  "Website",
+                                                                                     "value":  "={{ $json[\u0027Website\u0027] }}",
+                                                                                     "type":  "string"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "f-9",
+                                                                                     "name":  "Email",
+                                                                                     "value":  "={{ $json[\u0027Email\u0027] }}",
+                                                                                     "type":  "string"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "f-10",
+                                                                                     "name":  "LinkedIn",
+                                                                                     "value":  "={{ $json[\u0027LinkedIn\u0027] }}",
+                                                                                     "type":  "string"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "f-11",
+                                                                                     "name":  "Lead Source",
+                                                                                     "value":  "={{ $json[\u0027Lead Source\u0027] }}",
+                                                                                     "type":  "string"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "f-12",
+                                                                                     "name":  "ICP Match",
+                                                                                     "value":  "={{ $json[\u0027ICP Match\u0027] }}",
+                                                                                     "type":  "string"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "f-13",
+                                                                                     "name":  "Qualification Status",
+                                                                                     "value":  "={{ $json[\u0027Qualification Status\u0027] }}",
+                                                                                     "type":  "string"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "f-14",
+                                                                                     "name":  "lead_id",
+                                                                                     "value":  "={{ $json.lead_id }}",
+                                                                                     "type":  "string"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "f-15",
+                                                                                     "name":  "request_id",
+                                                                                     "value":  "={{ $json.request_id }}",
+                                                                                     "type":  "string"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "f-16",
+                                                                                     "name":  "Lead Score",
+                                                                                     "value":  "={{ $json[\u0027Lead Score\u0027] }}",
+                                                                                     "type":  "number"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "f-17",
+                                                                                     "name":  "Priority",
+                                                                                     "value":  "={{ $json.Priority }}",
+                                                                                     "type":  "string"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "f-18",
+                                                                                     "name":  "AI Insight",
+                                                                                     "value":  "={{ $json[\u0027AI Insight\u0027] }}",
+                                                                                     "type":  "string"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "f-19",
+                                                                                     "name":  "Phone",
+                                                                                     "value":  "={{ $json.phone }}",
+                                                                                     "type":  "string"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "f-20",
+                                                                                     "name":  "Annual Revenue",
+                                                                                     "value":  "={{ $json.annual_revenue }}",
+                                                                                     "type":  "string"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "f-21",
+                                                                                     "name":  "Employees",
+                                                                                     "value":  "={{ $json.employees }}",
+                                                                                     "type":  "string"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "f-22",
+                                                                                     "name":  "Founded Year",
+                                                                                     "value":  "={{ $json.founded_year }}",
+                                                                                     "type":  "string"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "f-23",
+                                                                                     "name":  "Funding Stage",
+                                                                                     "value":  "={{ $json.funding_stage }}",
+                                                                                     "type":  "string"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "f-24",
+                                                                                     "name":  "Company LinkedIn",
+                                                                                     "value":  "={{ $json.company_linkedin }}",
+                                                                                     "type":  "string"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "f-25",
+                                                                                     "name":  "Specialties",
+                                                                                     "value":  "={{ $json.specialties }}",
+                                                                                     "type":  "string"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "f-26",
+                                                                                     "name":  "Technologies",
+                                                                                     "value":  "={{ $json.technologies }}",
+                                                                                     "type":  "string"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "f-27",
+                                                                                     "name":  "Company Description",
+                                                                                     "value":  "={{ $json.company_description }}",
+                                                                                     "type":  "string"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "f-28",
+                                                                                     "name":  "personalization_hook",
+                                                                                     "value":  "={{ $json.personalization_hook }}",
+                                                                                     "type":  "string"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "f-29",
+                                                                                     "name":  "Total Funding",
+                                                                                     "value":  "={{ $json.total_funding }}",
+                                                                                     "type":  "string"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "dd1b363b-009f-4d98-a653-7877bb97ed33",
+                                                                                     "name":  "Country",
+                                                                                     "value":  "={{ $json[\u0027Country\u0027] }}",
+                                                                                     "type":  "string"
+                                                                                 }
+                                                                             ]
+                                                         },
+                                         "includeOtherFields":  true,
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "id":  "eb32931e-de20-476e-ac56-b62d4e5a4dc3",
+                      "name":  "Format Lead Data",
+                      "type":  "n8n-nodes-base.set",
+                      "typeVersion":  3.4,
+                      "position":  [
+                                       10992,
+                                       4224
+                                   ]
+                  },
+                  {
+                      "parameters":  {
+                                         "operation":  "append",
+                                         "documentId":  {
+                                                            "__rl":  true,
+                                                            "value":  "1k1KrZl8vqizufTPYfj6jhhwcPje-q7d5S5F0xDn0r5k",
+                                                            "mode":  "list",
+                                                            "cachedResultName":  "AGENT 1 OUTPUT",
+                                                            "cachedResultUrl":  "https://docs.google.com/spreadsheets/d/1k1KrZl8vqizufTPYfj6jhhwcPje-q7d5S5F0xDn0r5k/edit?usp=drivesdk"
+                                                        },
+                                         "sheetName":  {
+                                                           "__rl":  true,
+                                                           "value":  1604722233,
+                                                           "mode":  "list",
+                                                           "cachedResultName":  "Sheet4",
+                                                           "cachedResultUrl":  "https://docs.google.com/spreadsheets/d/1k1KrZl8vqizufTPYfj6jhhwcPje-q7d5S5F0xDn0r5k/edit#gid=1604722233"
+                                                       },
+                                         "columns":  {
+                                                         "mappingMode":  "defineBelow",
+                                                         "value":  {
+                                                                       "Lead ID":  "={{ $json[\u0027Lead ID\u0027] }}",
+                                                                       "Company Name":  "={{ $json[\u0027Company Name\u0027] }}",
+                                                                       "Industry":  "={{ $json[\u0027Industry\u0027] }}",
+                                                                       "Company Size":  "={{ $json[\u0027Company Size\u0027] }}",
+                                                                       "Location":  "={{ $json[\u0027Location\u0027] }}",
+                                                                       "Contact Name":  "={{ $json[\u0027Contact Name\u0027] }}",
+                                                                       "Designation":  "={{ $json[\u0027Designation\u0027] }}",
+                                                                       "Website":  "={{ $json[\u0027Website\u0027] }}",
+                                                                       "Email":  "={{ $json[\u0027Email\u0027] }}",
+                                                                       "Phone":  "={{ $json[\u0027Phone\u0027] || $json.phone }}",
+                                                                       "LinkedIn":  "={{ $json[\u0027LinkedIn\u0027] }}",
+                                                                       "Lead Source":  "={{ $json[\u0027Lead Source\u0027] }}",
+                                                                       "ICP Match":  "={{ $json[\u0027ICP Match\u0027] }}",
+                                                                       "Lead Score":  "={{ $json[\u0027Lead Score\u0027] }}",
+                                                                       "Priority":  "={{ $json[\u0027Priority\u0027] }}",
+                                                                       "Qualification Status":  "={{ $json[\u0027Qualification Status\u0027] }}",
+                                                                       "AI Insight":  "={{ $json[\u0027AI Insight\u0027] }}",
+                                                                       "Date":  "={{ $now.toISO() }}",
+                                                                       "Country":  "={{ $json[\u0027Country\u0027] }}"
+                                                                   },
+                                                         "matchingColumns":  [
+
+                                                                             ],
+                                                         "schema":  [
+                                                                        {
+                                                                            "id":  "Lead ID",
+                                                                            "displayName":  "Lead ID",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  true,
+                                                                            "removed":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Date",
+                                                                            "displayName":  "Date",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  true,
+                                                                            "removed":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Company Name",
+                                                                            "displayName":  "Company Name",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  true,
+                                                                            "removed":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Industry",
+                                                                            "displayName":  "Industry",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  true,
+                                                                            "removed":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Company Size",
+                                                                            "displayName":  "Company Size",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  true,
+                                                                            "removed":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Location",
+                                                                            "displayName":  "Location",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  true,
+                                                                            "removed":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Country",
+                                                                            "displayName":  "Country",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  true,
+                                                                            "removed":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Contact Name",
+                                                                            "displayName":  "Contact Name",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  true,
+                                                                            "removed":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Designation",
+                                                                            "displayName":  "Designation",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  true,
+                                                                            "removed":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Website",
+                                                                            "displayName":  "Website",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  true,
+                                                                            "removed":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Email",
+                                                                            "displayName":  "Email",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  true,
+                                                                            "removed":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Phone",
+                                                                            "displayName":  "Phone",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  true,
+                                                                            "removed":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "LinkedIn",
+                                                                            "displayName":  "LinkedIn",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  true,
+                                                                            "removed":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Lead Source",
+                                                                            "displayName":  "Lead Source",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  true,
+                                                                            "removed":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "ICP Match",
+                                                                            "displayName":  "ICP Match",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  true,
+                                                                            "removed":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Lead Score",
+                                                                            "displayName":  "Lead Score",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  true,
+                                                                            "removed":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Priority",
+                                                                            "displayName":  "Priority",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  true,
+                                                                            "removed":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "Qualification Status",
+                                                                            "displayName":  "Qualification Status",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  true,
+                                                                            "removed":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "AI Insight",
+                                                                            "displayName":  "AI Insight",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  true,
+                                                                            "removed":  false
+                                                                        }
+                                                                    ],
+                                                         "attemptToConvertTypes":  false,
+                                                         "convertFieldsToString":  false
+                                                     },
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "type":  "n8n-nodes-base.googleSheets",
+                      "typeVersion":  4.7,
+                      "position":  [
+                                       12064,
+                                       4480
+                                   ],
+                      "id":  "ec978c5d-00e2-4211-b09a-0cfe8d15a5e4",
+                      "name":  "Append row in sheet1",
+                      "credentials":  {
+                                          "googleSheetsOAuth2Api":  {
+                                                                        "id":  "GOPJNRTHojVlR020",
+                                                                        "name":  "Google Sheets account"
+                                                                    }
+                                      }
+                  },
+                  {
+                      "parameters":  {
+                                         "mode":  "runOnceForEachItem",
+                                         "jsCode":  "const lead = $(\u0027Format Lead Data\u0027).item.json;\n\nlet webhookData = {};\ntry {\n  webhookData = $(\u0027Webhook\u0027).first().json || {};\n} catch(e) {\n  webhookData = {};\n}\n\nconst analysis     = webhookData.analysis     || {};\nconst primaryIcp   = webhookData.primary_icp  || {};\nconst buyerPersona = webhookData.buyer_persona || {};\nconst gtmStrategy  = webhookData.gtm_strategy  || {};\n\nconst painPoints = Array.isArray(buyerPersona.pain_points) \u0026\u0026 buyerPersona.pain_points.length \u003e 0\n  ? buyerPersona.pain_points.join(\u0027, \u0027)\n  : (analysis.buyer_pain || \u0027Scaling sales operations efficiently\u0027);\n\nreturn {\n  \"Lead ID\":              lead[\"Lead ID\"],\n  \"Company Name\":         lead[\"Company Name\"],\n  \"Industry\":             lead[\"Industry\"],\n  \"Company Size\":         lead[\"Company Size\"],\n  \"Location\":             lead[\"Location\"],\n  \"Country\":              lead[\"Country\"] || lead.country || \u0027\u0027,\n  \"Contact Name\":         lead[\"Contact Name\"],\n  \"Designation\":          lead[\"Designation\"],\n  \"Website\":              lead[\"Website\"],\n  \"Email\":                lead[\"Email\"],\n  \"LinkedIn\":             lead[\"LinkedIn\"],\n  \"Lead Source\":          lead[\"Lead Source\"],\n  \"ICP Match\":            lead[\"ICP Match\"],\n  \"Qualification Status\": lead[\"Qualification Status\"],\n  \"lead_id\":              lead.lead_id,\n  \"request_id\":           lead.request_id,\n  \"Lead Score\":           lead[\"Lead Score\"],\n  \"Priority\":             lead[\"Priority\"],\n  \"AI Insight\":           lead[\"AI Insight\"] || \u0027\u0027,\n  \"Phone\":                lead[\"Phone\"]               || lead.phone               || \u0027\u0027,\n  \"Employees\":            lead[\"Employees\"]           || lead.employees           || \u0027\u0027,\n  \"Annual Revenue\":       lead[\"Annual Revenue\"]      || lead.annual_revenue      || \u0027\u0027,\n  \"Total Funding\":        lead[\"Total Funding\"]       || lead.total_funding       || \u0027\u0027,\n  \"Founded Year\":         lead[\"Founded Year\"]        || lead.founded_year        || \u0027\u0027,\n  \"Funding Stage\":        lead[\"Funding Stage\"]       || lead.funding_stage       || \u0027\u0027,\n  \"Company LinkedIn\":     lead[\"Company LinkedIn\"]    || lead.company_linkedin    || \u0027\u0027,\n  \"Specialties\":          lead[\"Specialties\"]         || lead.specialties         || \u0027\u0027,\n  \"Technologies\":         lead[\"Technologies\"]        || lead.technologies        || \u0027\u0027,\n  \"Company Description\":  lead[\"Company Description\"] || lead.company_description || \u0027\u0027,\n  \"personalization_hook\": lead[\"personalization_hook\"] || lead.personalization_hook || \u0027\u0027,\n  \"recommended_action\":   lead[\"recommended_action\"]  || lead.recommended_action  || \u0027\u0027,\n  \"icp_tier\":             lead[\"icp_tier\"]            || lead.icp_tier            || \u0027\u0027,\n  \"pain_points_matched\":  lead[\"pain_points_matched\"] || lead.pain_points_matched || \u0027\u0027,\n  \"seniority\":            lead.seniority              || \u0027\u0027,\n  \"product_name\":         analysis.product_name || \u0027Our Product\u0027,\n  \"company_name\":         analysis.company_name || \u0027Our Company\u0027,\n  \"positioning\":          analysis.positioning  || \u0027\u0027,\n  \"pain_points\":          painPoints,\n  \"target_market\":        primaryIcp.icp        || \u0027B2B companies looking to scale\u0027,\n  \"decision_makers\":      buyerPersona.role     || \u0027Sales Director\u0027,\n  \"target_locations\":     Array.isArray(gtmStrategy.target_countries)\n                            ? gtmStrategy.target_countries.join(\u0027, \u0027)\n                            : \u0027Canada\u0027\n};"
+                                     },
+                      "type":  "n8n-nodes-base.code",
+                      "typeVersion":  2,
+                      "position":  [
+                                       11664,
+                                       4224
+                                   ],
+                      "id":  "d6eae76e-0443-45ca-be9a-cbc90447ae3a",
+                      "name":  "Build Outreach Payload"
+                  },
+                  {
+                      "parameters":  {
+                                         "workflowId":  {
+                                                            "__rl":  true,
+                                                            "value":  "lCC7CErGQvdWUY47",
+                                                            "mode":  "list",
+                                                            "cachedResultUrl":  "/workflow/lCC7CErGQvdWUY47",
+                                                            "cachedResultName":  "Outreach Agent"
+                                                        },
+                                         "workflowInputs":  {
+                                                                "mappingMode":  "defineBelow",
+                                                                "value":  {
+
+                                                                          },
+                                                                "matchingColumns":  [
+
+                                                                                    ],
+                                                                "schema":  [
+
+                                                                           ],
+                                                                "attemptToConvertTypes":  false,
+                                                                "convertFieldsToString":  true
+                                                            },
+                                         "options":  {
+                                                         "waitForSubWorkflow":  false
+                                                     }
+                                     },
+                      "type":  "n8n-nodes-base.executeWorkflow",
+                      "typeVersion":  1.3,
+                      "position":  [
+                                       12080,
+                                       3952
+                                   ],
+                      "id":  "9b803974-a496-47ba-acbd-ee1032a891a1",
+                      "name":  "Call \u0027Outreach Agent\u0027"
+                  },
+                  {
+                      "parameters":  {
+                                         "httpMethod":  "POST",
+                                         "path":  "lead-management",
+                                         "responseMode":  "responseNode",
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "type":  "n8n-nodes-base.webhook",
+                      "typeVersion":  2.1,
+                      "position":  [
+                                       6576,
+                                       4352
+                                   ],
+                      "id":  "f653f288-ec31-4239-8ae8-5809a509c391",
+                      "name":  "Webhook",
+                      "webhookId":  "644a45f7-e519-49de-a866-2a2e34da5160"
+                  },
+                  {
+                      "parameters":  {
+
+                                     },
+                      "type":  "n8n-nodes-base.manualTrigger",
+                      "typeVersion":  1,
+                      "position":  [
+                                       6288,
+                                       3968
+                                   ],
+                      "id":  "82345f0e-9088-4509-8f0f-1419f2bde229",
+                      "name":  "When clicking \u0027Execute workflow\u0027"
+                  },
+                  {
+                      "parameters":  {
+                                         "assignments":  {
+                                                             "assignments":  [
+                                                                                 {
+                                                                                     "id":  "c2a9491e-1dce-4b4c-9f24-11c9e9a0d215",
+                                                                                     "name":  "request_id",
+                                                                                     "value":  "USA-MFG-001",
+                                                                                     "type":  "string"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "4271223f-8d44-4aad-8884-801a5b0f19cf",
+                                                                                     "name":  "industry",
+                                                                                     "value":  "=[\n  \"Manufacturing\",\n  \"Logistics\",\n  \"Supply Chain\",\n  \"Fleet Management\",\n  \"Automotive\",\n  \"Transportation\",\n  \"Warehousing \u0026 Distribution\",\n  \"Freight \u0026 Logistics\",\n  \"Shipping\",\n  \"Equipment Rental \u0026 Leasing\"\n]",
+                                                                                     "type":  "array"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "c93f3f22-413a-4acd-9b71-fc5f5e8c3273",
+                                                                                     "name":  "roles",
+                                                                                     "value":  "=[\n  \"Senior Manager\",\n  \"Manager\",\n  \"Operations Director\",\n  \"Operations Manager\",\n  \"Senior Operations Manager\",\n  \"Director of Operations\",\n  \"Fleet Director\",\n  \"Fleet Manager\",\n  \"Fleet Supervisor\",\n  \"Transportation Director\",\n  \"Transportation Manager\",\n  \"Transportation Supervisor\",\n  \"Logistics Director\",\n  \"Logistics Manager\",\n  \"Logistics Supervisor\",\n  \"Warehouse Director\",\n  \"Warehouse Manager\",\n  \"Warehouse Supervisor\",\n  \"Distribution Center Manager\",\n  \"Terminal Manager\",\n  \"Director of Asset Management\",\n  \"Asset Manager\",\n  \"Equipment Manager\",\n  \"Maintenance Director\",\n  \"Maintenance Manager\",\n  \"Maintenance Supervisor\",\n  \"Safety Manager\",\n  \"Director of EHS\",\n  \"EHS Manager\",\n  \"Risk Manager\",\n  \"Director of Risk Management\",\n  \"Security Manager\",\n  \"Security Director\",\n  \"Loss Prevention Manager\",\n  \"Supply Chain Director\",\n  \"Supply Chain Manager\",\n  \"Procurement Director\",\n  \"Procurement Manager\",\n  \"IoT Project Manager\",\n  \"Director\"\n]",
+                                                                                     "type":  "array"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "2d2853eb-e0fa-4853-8705-1b5fc0f59d94",
+                                                                                     "name":  "region",
+                                                                                     "value":  "=[\n  \"Canada\",\n]",
+                                                                                     "type":  "array"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+                                                                                     "name":  "cities",
+                                                                                     "value":  "=",
+                                                                                     "type":  "array"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "b2c3d4e5-f6a7-8901-bcde-f12345678901",
+                                                                                     "name":  "company_size",
+                                                                                     "value":  "=",
+                                                                                     "type":  "array"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "c3d4e5f6-a7b8-9012-cdef-123456789012",
+                                                                                     "name":  "business_context",
+                                                                                     "value":  "",
+                                                                                     "type":  "string"
+                                                                                 }
+                                                                             ]
+                                                         },
+                                         "options":  {
+                                                         "ignoreConversionErrors":  true
+                                                     }
+                                     },
+                      "type":  "n8n-nodes-base.set",
+                      "typeVersion":  3.4,
+                      "position":  [
+                                       6544,
+                                       3968
+                                   ],
+                      "id":  "f88599c0-ca6e-4ef4-a1ad-b4a9e2bde608",
+                      "name":  "Edit Fields"
+                  },
+                  {
+                      "parameters":  {
+                                         "mode":  "runOnceForEachItem",
+                                         "jsCode":  "const raw = (\n  $json.content?.[0]?.text                                  ||\n  $json.output?.[0]?.content?.[0]?.text                    ||\n  $json.choices?.[0]?.message?.content                     ||\n  $json.message?.content                                   ||\n  $json.text                                               ||\n  (typeof item.content === \u0027string\u0027 ? item.content : \u0027\u0027)  ||\n  \u0027\u0027\n);\n\nconst cleaned = raw.replace(/```json\\s*/gi, \u0027\u0027).replace(/```\\s*/g, \u0027\u0027).trim();\nconst jsonMatch = cleaned.match(/\\{[\\s\\S]*\\}/);\nconst jsonStr = jsonMatch ? jsonMatch[0] : \u0027\u0027;\n\nlet ai;\ntry {\n  ai = JSON.parse(jsonStr);\n} catch(e) {\n  ai = {\n    lead_score:             40,\n    priority:               \u0027Medium\u0027,\n    icp_tier:               \u0027unknown\u0027,\n    role_fit_score:         10,\n    company_fit_score:      10,\n    pain_point_score:       10,\n    data_quality_score:     10,\n    fit_reason:             \u0027AI scoring failed Ã¢â‚¬â€ manual review needed. Raw preview: \u0027 + raw.substring(0, 120),\n    pain_points_identified: [],\n    personalization_hook:   \u0027\u0027,\n    recommended_action:     \u0027Manual review required\u0027\n  };\n}\n\nconst lead   = $(\u0027Filter \u0026 Clean Leads\u0027).item.json;\nconst params = $(\u0027Parse ICP Payload\u0027).first().json;\n\nconst icpMatch = ai.icp_tier \u0026\u0026 ai.icp_tier !== \u0027none\u0027 \u0026\u0026 ai.icp_tier !== \u0027unknown\u0027\n  ? \u0027Yes (\u0027 + ai.icp_tier + \u0027)\u0027\n  : \u0027No\u0027;\n\nreturn {\n  json: {\n    \u0027Lead ID\u0027:              lead[\u0027Lead ID\u0027]      || lead.email        || \u0027\u0027,\n    \u0027Phone\u0027:                lead.phone               || \u0027\u0027,\n    \u0027Annual Revenue\u0027:       lead.annual_revenue      || \u0027\u0027,\n    \u0027Employees\u0027:            lead.employees           || \u0027\u0027,\n    \u0027Founded Year\u0027:         lead.founded_year        || \u0027\u0027,\n    \u0027Funding Stage\u0027:        lead.funding_stage       || \u0027\u0027,\n    \u0027Total Funding\u0027:        lead.total_funding       || \u0027\u0027,\n    \u0027Company LinkedIn\u0027:     lead.company_linkedin    || \u0027\u0027,\n    \u0027Specialties\u0027:          lead.specialties         || \u0027\u0027,\n    \u0027Technologies\u0027:         lead.technologies        || \u0027\u0027,\n    \u0027Company Description\u0027:  (lead.company_description || \u0027\u0027).substring(0, 300),\n    \u0027Company Name\u0027:         lead[\u0027Company Name\u0027] || lead.company_name || \u0027N/A\u0027,\n    \u0027Industry\u0027:             lead[\u0027Industry\u0027]     || lead.industry     || \u0027N/A\u0027,\n    \u0027Company Size\u0027:         lead[\u0027Company Size\u0027] || lead.company_size || \u0027N/A\u0027,\n    \u0027Location\u0027:             lead[\u0027Location\u0027]     || lead.location     || \u0027N/A\u0027,\n    \u0027Country\u0027:              lead[\u0027Country\u0027]      || lead.country      || \u0027N/A\u0027,\n    \u0027Contact Name\u0027:         lead[\u0027Contact Name\u0027] || lead.contact_name || \u0027N/A\u0027,\n    \u0027Designation\u0027:          lead[\u0027Designation\u0027]  || lead.title || lead.job_title || \u0027N/A\u0027,\n    \u0027Website\u0027:              lead[\u0027Website\u0027]      || \u0027\u0027,\n    \u0027Email\u0027:                lead[\u0027Email\u0027]        || lead.email        || \u0027\u0027,\n    \u0027LinkedIn\u0027:             lead[\u0027LinkedIn\u0027]     || lead.linkedin     || \u0027\u0027,\n    \u0027Lead Source\u0027:          \u0027Apify Leads Finder\u0027,\n    \u0027ICP Match\u0027:            icpMatch,\n    \u0027Lead Score\u0027:           ai.lead_score        || 0,\n    \u0027Priority\u0027:             ai.priority          || \u0027Low\u0027,\n    \u0027Qualification Status\u0027: \u0027New\u0027,\n    \u0027AI Insight\u0027:           (ai.fit_reason || \u0027\u0027) + \u0027 | Hook: \u0027 + (ai.personalization_hook || \u0027\u0027) + \u0027 | Action: \u0027 + (ai.recommended_action || \u0027\u0027),\n    \u0027lead_id\u0027:              lead[\u0027lead_id\u0027]      || lead.email        || \u0027\u0027,\n    \u0027request_id\u0027:           lead[\u0027request_id\u0027]   || lead.request_id   || \u0027\u0027,\n    \u0027product_name\u0027:         params.product_name  || \u0027Our Product\u0027,\n    \u0027company_name\u0027:         params.company_name  || \u0027Our Company\u0027,\n    \u0027positioning\u0027:          params.positioning   || \u0027\u0027,\n    \u0027pain_points\u0027:          params.pain_points   || \u0027\u0027,\n    \u0027target_market\u0027:        params.target_market || \u0027\u0027,\n    \u0027decision_makers\u0027:      params.job_titles    || \u0027\u0027,\n    \u0027target_locations\u0027:     params.priority_regions || \u0027\u0027,\n    \u0027icp_tier\u0027:             ai.icp_tier          || \u0027unknown\u0027,\n    \u0027pain_points_matched\u0027:  (ai.pain_points_identified || []).join(\u0027, \u0027),\n    \u0027personalization_hook\u0027: ai.personalization_hook  || \u0027\u0027,\n    \u0027recommended_action\u0027:   ai.recommended_action    || \u0027\u0027,\n    \u0027role_fit_score\u0027:       ai.role_fit_score        || 0,\n    \u0027company_fit_score\u0027:    ai.company_fit_score     || 0,\n    \u0027pain_point_score\u0027:     ai.pain_point_score      || 0,\n    \u0027data_quality_score\u0027:   ai.data_quality_score    || 0,\n    \u0027seniority\u0027:            lead.seniority           || \u0027\u0027,\n    \u0027founded_year\u0027:         lead.founded_year        || \u0027\u0027,\n    \u0027funding_stage\u0027:        lead.funding_stage       || \u0027\u0027,\n    \u0027company_description\u0027:  lead.company_description || \u0027\u0027,\n    \u0027country\u0027:              lead.country             || \u0027\u0027\n  }\n};"
+                                     },
+                      "id":  "5657bf7c-5c7e-41b1-ae73-4e1fac2af0b5",
+                      "name":  "Parse AI Score",
+                      "type":  "n8n-nodes-base.code",
+                      "typeVersion":  2,
+                      "position":  [
+                                       10192,
+                                       4256
+                                   ]
+                  },
+                  {
+                      "parameters":  {
+                                         "conditions":  {
+                                                            "options":  {
+                                                                            "caseSensitive":  true,
+                                                                            "leftValue":  "",
+                                                                            "typeValidation":  "strict",
+                                                                            "version":  3
+                                                                        },
+                                                            "conditions":  [
+                                                                               {
+                                                                                   "id":  "cond-score",
+                                                                                   "leftValue":  "={{ $json[\u0027Lead Score\u0027] }}",
+                                                                                   "rightValue":  50,
+                                                                                   "operator":  {
+                                                                                                    "type":  "number",
+                                                                                                    "operation":  "gte"
+                                                                                                }
+                                                                               }
+                                                                           ],
+                                                            "combinator":  "and"
+                                                        },
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "id":  "464facf5-b3ac-41dc-8866-127f6a1f2052",
+                      "name":  "IF: Score \u003e= 50",
+                      "type":  "n8n-nodes-base.if",
+                      "typeVersion":  2.3,
+                      "position":  [
+                                       10400,
+                                       4256
+                                   ]
+                  },
+                  {
+                      "parameters":  {
+                                         "modelId":  {
+                                                         "__rl":  true,
+                                                         "value":  "gpt-4.1",
+                                                         "mode":  "list",
+                                                         "cachedResultName":  "GPT-4.1"
+                                                     },
+                                         "responses":  {
+                                                           "values":  [
+                                                                          {
+                                                                              "content":  "=You are a world-class B2B lead qualification expert with deep knowledge of sales, buyer psychology, and industry verticals.\nYou are a senior B2B sales strategist scoring leads for outreach prioritization.\n\nÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â\nWHAT WE SELL\nÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â\nCompany:      {{ $(\u0027Parse ICP Payload\u0027).first().json.company_name }}\nProduct:      {{ $(\u0027Parse ICP Payload\u0027).first().json.product_name }}\nPositioning:  {{ $(\u0027Parse ICP Payload\u0027).first().json.positioning }}\nTarget Market:{{ $(\u0027Parse ICP Payload\u0027).first().json.target_market }}\nKey Messages: {{ $(\u0027Parse ICP Payload\u0027).first().json.messaging }}\n\nÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â\nIDEAL CUSTOMER PROFILE\nÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â\nTarget Industries:  {{ $(\u0027Parse ICP Payload\u0027).first().json.target_industries }}\nIdeal Company Size: {{ $(\u0027Parse ICP Payload\u0027).first().json.ideal_company_size }}\nPriority Regions:   {{ $(\u0027Parse ICP Payload\u0027).first().json.priority_regions }}\nPriority Cities:    {{ $(\u0027Parse ICP Payload\u0027).first().json.priority_cities }}\nPrimary ICP:        {{ $(\u0027Parse ICP Payload\u0027).first().json.primary_icp }}\nSecondary ICP:      {{ $(\u0027Parse ICP Payload\u0027).first().json.secondary_icp }}\nBusiness Context:   {{ $(\u0027Parse ICP Payload\u0027).first().json.business_context }}\n\nÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â\nTARGET BUYER PERSONA\nÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â\nTarget Titles:  {{ $(\u0027Parse ICP Payload\u0027).first().json.job_titles }}\nPain Points:    {{ $(\u0027Parse ICP Payload\u0027).first().json.pain_points }}\nBusiness Goals: {{ $(\u0027Parse ICP Payload\u0027).first().json.business_goals }}\n\nÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â\nLEAD DATA\nÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â\nName:               {{ $json.contact_name }}\nJob Title:          {{ $json.job_title }}\nSeniority:          {{ $json.seniority }}\nEmail:              {{ $json.email }}\nEmail Status:       {{ $json.email_status }}\nLinkedIn:           {{ $json.linkedin }}\nCompany:            {{ $json.company_name }}\nIndustry:           {{ $json.industry }}\nCompany Size:       {{ $json.company_size }}\nLocation:           {{ $json.location }}\nCountry:            {{ $json.country }}\nFounded:            {{ $json.founded_year }}\nAnnual Revenue:     {{ $json.annual_revenue }}\nTechnologies:       {{ $json.technologies }}\nCompany Desc:       {{ $json.company_description }}\n\nÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â\nSCORING RULES\nÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â\nScore 0Ã¢â‚¬â€œ100 across 4 dimensions. BE GENEROUS Ã¢â‚¬â€ missing fields mean less data, not a bad lead.\n\n1. ROLE FIT (0Ã¢â‚¬â€œ35 pts)\n2. COMPANY FIT (0Ã¢â‚¬â€œ30 pts)\n3. PAIN POINT RELEVANCE (0Ã¢â‚¬â€œ25 pts)\n4. DATA QUALITY (0Ã¢â‚¬â€œ10 pts)\n\nReturn ONLY valid JSON:\n{\n  \"lead_score\": 0,\n  \"priority\": \"High\",\n  \"icp_tier\": \"primary\",\n  \"role_fit_score\": 0,\n  \"company_fit_score\": 0,\n  \"pain_point_score\": 0,\n  \"data_quality_score\": 0,\n  \"fit_reason\": \"2-sentence explanation\",\n  \"pain_points_identified\": [\"pain point 1\"],\n  \"personalization_hook\": \"One specific compelling talking point\",\n  \"recommended_action\": \"Specific next step\"\n}"
+                                                                          }
+                                                                      ]
+                                                       },
+                                         "builtInTools":  {
+
+                                                          },
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "type":  "@n8n/n8n-nodes-langchain.openAi",
+                      "typeVersion":  2.3,
+                      "position":  [
+                                       9840,
+                                       4256
+                                   ],
+                      "id":  "791f7c53-fa53-4432-b086-8e1e25fcdfea",
+                      "name":  "Message a model1",
+                      "credentials":  {
+                                          "openAiApi":  {
+                                                            "id":  "ODOlsxHV7W56bDtS",
+                                                            "name":  "OpenAI account"
+                                                        }
+                                      }
+                  },
+                  {
+                      "parameters":  {
+                                         "jsCode":  "const request = $input.item.json;\nconst body = request.body ?? request;\n\nconst isManualTrigger = Array.isArray(body.industry) || Array.isArray(body.roles);\n\nif (isManualTrigger) {\n  return {\n    request_id:             body.request_id      || \u0027\u0027,\n    product_name:           \u0027Our Product\u0027,\n    company_name:           \u0027Our Company\u0027,\n    positioning:            \u0027\u0027,\n    target_market:          \u0027B2B companies looking to scale\u0027,\n    messaging:              \u0027\u0027,\n    primary_icp:            \u0027{}\u0027,\n    secondary_icp:          \u0027{}\u0027,\n    tertiary_icp:           \u0027{}\u0027,\n    target_industries:      Array.isArray(body.industry)      ? body.industry.join(\u0027, \u0027)      : \u0027\u0027,\n    ideal_company_size:     Array.isArray(body.company_size)  ? body.company_size.join(\u0027, \u0027)  : \u0027\u0027,\n    qualification_criteria: \u0027\u0027,\n    priority_regions:       Array.isArray(body.region)        ? body.region.join(\u0027, \u0027)        : \u0027Canada\u0027,\n    priority_cities:        Array.isArray(body.cities)        ? body.cities.join(\u0027, \u0027)        : \u0027\u0027,\n    priority_states:        Array.isArray(body.states)        ? body.states.join(\u0027, \u0027)        : \u0027\u0027,\n    job_titles:             Array.isArray(body.roles)         ? body.roles.join(\u0027, \u0027)         : \u0027\u0027,\n    pain_points:            \u0027\u0027,\n    business_goals:         \u0027\u0027,\n    business_context:       body.business_context || \u0027\u0027\n  };\n}\n\n// Ã¢â€â‚¬Ã¢â€â‚¬ Webhook path Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬\nconst analysis     = body.analysis     || {};\nconst primaryIcp   = body.primary_icp  || {};\nconst buyerPersona = body.buyer_persona || {};\nconst gtmStrategy  = body.gtm_strategy  || {};\n\nreturn {\n  request_id:             body.request_id || \u0027\u0027,\n  product_name:           analysis.product_name   || body.product_name   || \u0027Our Product\u0027,\n  company_name:           analysis.company_name   || body.company_name   || \u0027Our Company\u0027,\n  positioning:            analysis.positioning    || body.positioning    || \u0027\u0027,\n  target_market:          primaryIcp.icp         || body.target_market  || \u0027B2B companies looking to scale\u0027,\n  messaging:              analysis.key_messages   || \u0027\u0027,\n  primary_icp:            JSON.stringify(primaryIcp),\n  secondary_icp:          JSON.stringify(body.secondary_icp || {}),\n  tertiary_icp:           JSON.stringify(body.tertiary_icp  || {}),\n  target_industries:      Array.isArray(primaryIcp.industry)\n                            ? primaryIcp.industry.join(\u0027, \u0027)\n                            : (primaryIcp.industry || \u0027\u0027),\n  ideal_company_size:     primaryIcp.company_size     || \u0027\u0027,\n  qualification_criteria: primaryIcp.qualification    || \u0027\u0027,\n  priority_regions:       Array.isArray(gtmStrategy.target_countries)\n                            ? gtmStrategy.target_countries.join(\u0027, \u0027)\n                            : \u0027Canada\u0027,\n  priority_cities:        Array.isArray(gtmStrategy.target_cities)\n                            ? gtmStrategy.target_cities.join(\u0027, \u0027)\n                            : \u0027\u0027,\n  priority_states:        Array.isArray(gtmStrategy.target_states)\n                            ? gtmStrategy.target_states.join(\u0027, \u0027)\n                            : \u0027\u0027,\n  job_titles:             Array.isArray(primaryIcp.job_titles)\n                            ? primaryIcp.job_titles.join(\u0027, \u0027)\n                            : (Array.isArray(buyerPersona.roles) ? buyerPersona.roles.join(\u0027, \u0027) : \u0027\u0027),\n  pain_points:            Array.isArray(buyerPersona.pain_points)\n                            ? buyerPersona.pain_points.join(\u0027, \u0027)\n                            : \u0027\u0027,\n  business_goals:         Array.isArray(buyerPersona.business_goals)\n                            ? buyerPersona.business_goals.join(\u0027, \u0027)\n                            : \u0027\u0027,\n  business_context:       analysis.business_context || \u0027\u0027\n};"
+                                     },
+                      "type":  "n8n-nodes-base.code",
+                      "typeVersion":  2,
+                      "position":  [
+                                       6928,
+                                       4240
+                                   ],
+                      "id":  "e1552554-92de-4d2d-9fad-b6ca46ee2db1",
+                      "name":  "Parse ICP Payload"
+                  },
+                  {
+                      "parameters":  {
+                                         "jsCode":  "const p = $(\u0027Parse ICP Payload\u0027).first().json;\n\n// Ã¢â€â‚¬Ã¢â€â‚¬ Generic title-case helper Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬\nconst toTitleCase = (s) =\u003e s.split(\u0027 \u0027).map(w =\u003e w.charAt(0).toUpperCase() + w.slice(1)).join(\u0027 \u0027);\n\n// Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â\n// INDUSTRY MATCHING Ã¢â‚¬â€ against the pipelinelabs actor\u0027s CONFIRMED enum\n// (this is the exact list returned by its own validation error, i.e.\n// ground truth, not a guess)\n// Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â\nconst PIPELINELABS_INDUSTRY_ENUM = [\n  \"Accounting\",\"Agriculture\",\"Airlines/Aviation\",\"Animation\",\"Apparel \u0026 Fashion\",\n  \"Architecture \u0026 Planning\",\"Automotive\",\"Aviation \u0026 Aerospace\",\"Banking\",\"Biotechnology\",\n  \"Broadcast Media\",\"Building Materials\",\"Capital Markets\",\"Chemicals\",\"Civil Engineering\",\n  \"Commercial Real Estate\",\"Computer \u0026 Network Security\",\"Computer Games\",\"Computer Hardware\",\n  \"Computer Networking\",\"Computer Software\",\"Construction\",\"Consumer Electronics\",\n  \"Consumer Goods\",\"Consumer Services\",\"Defense \u0026 Space\",\"Design\",\"E-Learning\",\n  \"Education Management\",\"Electrical/Electronic Manufacturing\",\"Entertainment\",\n  \"Environmental Services\",\"Events Services\",\"Financial Services\",\"Food \u0026 Beverages\",\n  \"Food Production\",\"Furniture\",\"Government Administration\",\"Graphic Design\",\n  \"Health, Wellness \u0026 Fitness\",\"Higher Education\",\"Hospital \u0026 Health Care\",\"Hospitality\",\n  \"Human Resources\",\"Industrial Automation\",\"Information Services\",\n  \"Information Technology \u0026 Services\",\"Insurance\",\"Internet\",\"Investment Banking\",\n  \"Investment Management\",\"Law Practice\",\"Legal Services\",\"Leisure, Travel \u0026 Tourism\",\n  \"Logistics \u0026 Supply Chain\",\"Luxury Goods \u0026 Jewelry\",\"Machinery\",\"Management Consulting\",\n  \"Market Research\",\"Marketing \u0026 Advertising\",\"Mechanical or Industrial Engineering\",\n  \"Media Production\",\"Medical Devices\",\"Medical Practice\",\"Mental Health Care\",\n  \"Mining \u0026 Metals\",\"Non-Profit Organization Management\",\"Oil \u0026 Energy\",\"Online Media\",\n  \"Outsourcing/Offshoring\",\"Pharmaceuticals\",\"Photography\",\"Professional Training \u0026 Coaching\",\n  \"Public Relations \u0026 Communications\",\"Publishing\",\"Real Estate\",\"Recreation \u0026 Sports\",\n  \"Renewables \u0026 Environment\",\"Research\",\"Restaurants\",\"Retail\",\"Security \u0026 Investigations\",\n  \"Semiconductors\",\"Staffing \u0026 Recruiting\",\"Telecommunications\",\n  \"Transportation/Trucking/Railroad\",\"Utilities\",\"Venture Capital \u0026 Private Equity\",\n  \"Warehousing\",\"Wholesale\",\"Wine \u0026 Spirits\",\"Wireless\",\"Writing \u0026 Editing\"\n];\n\n// Small alias table for common ICP phrasing that doesn\u0027t literally appear in the enum.\n// This is NOT vertical-specific hardcoding Ã¢â‚¬â€ it\u0027s grounded in the real confirmed enum,\n// just bridging common synonyms (e.g. \"SaaS\" isn\u0027t a LinkedIn industry, but \"Computer\n// Software\" is). Safe to extend over time as you see more ICP phrasings come through.\nconst INDUSTRY_ALIASES = {\n  \u0027saas\u0027: \u0027Computer Software\u0027,\n  \u0027software\u0027: \u0027Computer Software\u0027,\n  \u0027tech\u0027: \u0027Information Technology \u0026 Services\u0027,\n  \u0027technology\u0027: \u0027Information Technology \u0026 Services\u0027,\n  \u0027it\u0027: \u0027Information Technology \u0026 Services\u0027,\n  \u0027fintech\u0027: \u0027Financial Services\u0027,\n  \u0027logistics\u0027: \u0027Logistics \u0026 Supply Chain\u0027,\n  \u0027supply chain\u0027: \u0027Logistics \u0026 Supply Chain\u0027,\n  \u0027trucking\u0027: \u0027Transportation/Trucking/Railroad\u0027,\n  \u0027fleet\u0027: \u0027Transportation/Trucking/Railroad\u0027,\n  \u0027fleet operations\u0027: \u0027Transportation/Trucking/Railroad\u0027,\n  \u0027transportation\u0027: \u0027Transportation/Trucking/Railroad\u0027,\n  \u0027shipping\u0027: \u0027Logistics \u0026 Supply Chain\u0027,\n  \u0027freight\u0027: \u0027Logistics \u0026 Supply Chain\u0027,\n  \u0027courier\u0027: \u0027Logistics \u0026 Supply Chain\u0027,\n  \u0027healthcare\u0027: \u0027Hospital \u0026 Health Care\u0027,\n  \u0027health care\u0027: \u0027Hospital \u0026 Health Care\u0027,\n  \u0027ecommerce\u0027: \u0027Internet\u0027,\n  \u0027e-commerce\u0027: \u0027Internet\u0027,\n  \u0027manufacturing\u0027: \u0027Industrial Automation\u0027,\n  \u0027edtech\u0027: \u0027E-Learning\u0027,\n  \u0027ai\u0027: \u0027Information Technology \u0026 Services\u0027,\n  \u0027cybersecurity\u0027: \u0027Computer \u0026 Network Security\u0027,\n  \u0027security\u0027: \u0027Computer \u0026 Network Security\u0027\n};\n\nconst normalize = (s) =\u003e s.toLowerCase().replace(/[\u0026,/]/g, \u0027 \u0027).replace(/\\s+/g, \u0027 \u0027).trim();\nconst ENUM_NORMALIZED = PIPELINELABS_INDUSTRY_ENUM.map(e =\u003e ({ original: e, norm: normalize(e) }));\n\nfunction matchIndustry(term) {\n  const t = normalize(term);\n\n  // 1. Alias table (highest confidence)\n  if (INDUSTRY_ALIASES[t]) return INDUSTRY_ALIASES[t];\n\n  // 2. Exact normalized match against enum\n  const exact = ENUM_NORMALIZED.find(e =\u003e e.norm === t);\n  if (exact) return exact.original;\n\n  // 3. Substring match either direction\n  const substr = ENUM_NORMALIZED.find(e =\u003e e.norm.includes(t) || t.includes(e.norm));\n  if (substr) return substr.original;\n\n  // 4. Token overlap Ã¢â‚¬â€ match if any significant word (4+ chars) is shared\n  const tTokens = t.split(\u0027 \u0027).filter(w =\u003e w.length \u003e= 4);\n  let best = null, bestScore = 0;\n  for (const e of ENUM_NORMALIZED) {\n    const eTokens = e.norm.split(\u0027 \u0027).filter(w =\u003e w.length \u003e= 4);\n    const overlap = tTokens.filter(w =\u003e eTokens.includes(w)).length;\n    if (overlap \u003e bestScore) { bestScore = overlap; best = e.original; }\n  }\n  if (best) return best;\n\n  // 5. No confident match Ã¢â‚¬â€ return null rather than guessing\n  return null;\n}\n\nconst rawIndustryTerms = (p.target_industries || \u0027\u0027).split(\u0027,\u0027).map(s =\u003e s.trim()).filter(Boolean);\nconst matchedIndustries = [];\nconst unmatchedIndustries = [];\nrawIndustryTerms.forEach(term =\u003e {\n  const match = matchIndustry(term);\n  if (match) matchedIndustries.push(match);\n  else unmatchedIndustries.push(term);\n});\nconst companyIndustryIncludes = [...new Set(matchedIndustries)]; // dedupe\n\n// Ã¢â€â‚¬Ã¢â€â‚¬ Titles: universal abbreviation expansion, nothing vertical-specific Ã¢â€â‚¬Ã¢â€â‚¬\nconst abbreviationExpansion = {\n  \u0027ceo\u0027: [\u0027CEO\u0027, \u0027Chief Executive Officer\u0027],\n  \u0027coo\u0027: [\u0027COO\u0027, \u0027Chief Operating Officer\u0027],\n  \u0027cto\u0027: [\u0027CTO\u0027, \u0027Chief Technology Officer\u0027],\n  \u0027cfo\u0027: [\u0027CFO\u0027, \u0027Chief Financial Officer\u0027],\n  \u0027cio\u0027: [\u0027CIO\u0027, \u0027Chief Information Officer\u0027],\n  \u0027ciso\u0027: [\u0027CISO\u0027, \u0027Chief Information Security Officer\u0027],\n  \u0027cpo\u0027: [\u0027CPO\u0027, \u0027Chief Product Officer\u0027],\n  \u0027cdo\u0027: [\u0027CDO\u0027, \u0027Chief Digital Officer\u0027],\n  \u0027cmo\u0027: [\u0027CMO\u0027, \u0027Chief Marketing Officer\u0027],\n  \u0027csco\u0027: [\u0027CSCO\u0027, \u0027Chief Supply Chain Officer\u0027],\n  \u0027vp\u0027: [\u0027VP\u0027, \u0027Vice President\u0027],\n  \u0027svp\u0027: [\u0027SVP\u0027, \u0027Senior Vice President\u0027],\n  \u0027evp\u0027: [\u0027EVP\u0027, \u0027Executive Vice President\u0027],\n  \u0027gm\u0027: [\u0027GM\u0027, \u0027General Manager\u0027],\n  \u0027md\u0027: [\u0027MD\u0027, \u0027Managing Director\u0027]\n};\n\nconst rawRoles = (p.job_titles || \u0027\u0027).split(\u0027,\u0027).map(s =\u003e s.trim().toLowerCase()).filter(Boolean);\nconst tSet = new Set();\nrawRoles.forEach(r =\u003e {\n  const expanded = abbreviationExpansion[r];\n  if (expanded) expanded.forEach(t =\u003e tSet.add(t));\n  else tSet.add(toTitleCase(r));\n});\nconst contactJobTitles = [...tSet];\n\n// Ã¢â€â‚¬Ã¢â€â‚¬ Cities \u0026 Countries Ã¢â‚¬â€ generic, no defaults injected Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬\nconst cities    = (p.priority_cities  || \u0027\u0027).split(\u0027,\u0027).map(s =\u003e s.trim()).filter(Boolean);\nconst states    = (p.priority_states  || \u0027\u0027).split(\u0027,\u0027).map(s =\u003e s.trim()).filter(Boolean);\nconst countries = (p.priority_regions || \u0027\u0027).split(\u0027,\u0027).map(s =\u003e s.trim()).filter(Boolean);\n\n// Ã¢â€â‚¬Ã¢â€â‚¬ Company size: generic bucket normalization Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬\nconst sizeMapping = {\n  \u00271-10\u0027:    [\u00271-10\u0027],\n  \u002711-50\u0027:   [\u002711-20\u0027,\u002721-50\u0027],\n  \u002711-20\u0027:   [\u002711-20\u0027],\n  \u002721-50\u0027:   [\u002721-50\u0027],\n  \u002751-200\u0027:  [\u002751-100\u0027,\u0027101-200\u0027],\n  \u002751-100\u0027:  [\u002751-100\u0027],\n  \u0027101-200\u0027: [\u0027101-200\u0027],\n  \u0027201-500\u0027: [\u0027201-500\u0027],\n  \u0027501-1000\u0027:[\u0027501-1000\u0027],\n  \u00271-20\u0027:    [\u00271-10\u0027,\u002711-20\u0027]\n};\nconst rawSizes = (p.ideal_company_size || \u0027\u0027).split(\u0027,\u0027).map(s =\u003e s.trim()).filter(Boolean);\nconst sizeSet = new Set();\nrawSizes.forEach(s =\u003e {\n  const mapped = sizeMapping[s];\n  if (mapped) mapped.forEach(v =\u003e sizeSet.add(v));\n  else sizeSet.add(s);\n});\nconst sizeIncludes = [...sizeSet];\n\n// Ã¢â€â‚¬Ã¢â€â‚¬ apifyInput for microworlds/leads-finder (city-level actor) Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬\n// NOTE: microworlds\u0027 own industry enum is NOT yet confirmed Ã¢â‚¬â€ passing matched\n// values through as a reasonable starting point since they share LinkedIn-style\n// taxonomy in the values we\u0027ve seen so far. If this actor also throws a 400 with\n// an allowed-values list, paste it back and I\u0027ll add the same matcher for it.\nconst apifyInput = {\n  contact_job_titles:          contactJobTitles,\n  company_industry:            companyIndustryIncludes,\n  company_num_employees_range: sizeIncludes,\n  email_status:                [\u0027verified\u0027],\n  max_result:                  100\n};\nif (cities.length \u003e 0)         apifyInput.contact_location = cities;\nelse if (states.length \u003e 0)    apifyInput.contact_location = states;\nelse if (countries.length \u003e 0) apifyInput.contact_location = countries;\n\n// Ã¢â€â‚¬Ã¢â€â‚¬ pipelineInput for pipelinelabs/leads-finder-with-emails (region-level actor) Ã¢â€â‚¬Ã¢â€â‚¬\nconst pipelineInput = {\n  totalResults:             apifyInput.max_result || 100,\n  personTitleIncludes:      contactJobTitles,\n  includeTitleVariants:     true,\n  roleMatchMode:            \u0027any\u0027,\n  emailStatusIncludes:      [\u0027verified\u0027],   // confirmed enum: \"verified\" | \"unverified\"\n  companyIndustryIncludes:  companyIndustryIncludes  // confirmed enum, matched above\n};\nif (countries.length \u003e 0) pipelineInput.personLocationCountryIncludes = countries;\nif (states.length \u003e 0)    pipelineInput.personLocationStateIncludes   = states;\nif (cities.length \u003e 0)    pipelineInput.personLocationCityIncludes    = cities;\nif (rawSizes.length \u003e 0)  pipelineInput.companySizeIncludes           = rawSizes;\n\nreturn [{\n  json: {\n    requestId:            p.request_id || \u0027\u0027,\n    industry:              companyIndustryIncludes.join(\u0027, \u0027),\n    location:              countries.join(\u0027, \u0027),\n    priority_cities:       cities.join(\u0027, \u0027),\n    priority_states:       states.join(\u0027, \u0027),\n    job_titles:            contactJobTitles.join(\u0027, \u0027),\n    unmatched_industries:  unmatchedIndustries.join(\u0027, \u0027), // visibility into anything dropped\n    apifyInput,\n    pipelineInput\n  }\n}];"
+                                     },
+                      "type":  "n8n-nodes-base.code",
+                      "typeVersion":  2,
+                      "position":  [
+                                       7152,
+                                       4240
+                                   ],
+                      "id":  "bb46cafc-fceb-4c64-a4e3-6c043f219105",
+                      "name":  "Prepare Search Parameters"
+                  },
+                  {
+                      "parameters":  {
+                                         "conditions":  {
+                                                            "options":  {
+                                                                            "caseSensitive":  true,
+                                                                            "leftValue":  "",
+                                                                            "typeValidation":  "strict",
+                                                                            "version":  3
+                                                                        },
+                                                            "conditions":  [
+                                                                               {
+                                                                                   "id":  "cond-city-icp",
+                                                                                   "leftValue":  "={{ $json.priority_cities }}",
+                                                                                   "rightValue":  "",
+                                                                                   "operator":  {
+                                                                                                    "type":  "string",
+                                                                                                    "operation":  "isNotEmpty"
+                                                                                                }
+                                                                               }
+                                                                           ],
+                                                            "combinator":  "and"
+                                                        },
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "id":  "094d7d6f-c350-4577-acc4-7f96ed7c89aa",
+                      "name":  "IF: City-Specific ICP?",
+                      "type":  "n8n-nodes-base.if",
+                      "typeVersion":  2.3,
+                      "position":  [
+                                       7376,
+                                       4240
+                                   ]
+                  },
+                  {
+                      "parameters":  {
+                                         "method":  "POST",
+                                         "url":  "https://api.apify.com/v2/acts/pipelinelabs~leads-finder-with-emails-apollo-lusha-zoominfo/runs",
+                                         "sendHeaders":  true,
+                                         "headerParameters":  {
+                                                                  "parameters":  [
+                                                                                     {
+                                                                                         "name":  "Content-Type",
+                                                                                         "value":  "application/json"
+                                                                                     },
+                                                                                     {
+                                                                                         "name":  "Authorization",
+                                                                                         "value":  "Bearer {{ $env.APIFY_API_TOKEN }}"
+                                                                                     }
+                                                                                 ]
+                                                              },
+                                         "sendBody":  true,
+                                         "specifyBody":  "json",
+                                         "jsonBody":  "={{ JSON.stringify($json.pipelineInput) }}",
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "id":  "32b49124-b7be-4540-90a2-21cb178c48e2",
+                      "name":  "Start Leads Finder (City)",
+                      "type":  "n8n-nodes-base.httpRequest",
+                      "typeVersion":  4.4,
+                      "position":  [
+                                       7696,
+                                       3968
+                                   ]
+                  },
+                  {
+                      "parameters":  {
+                                         "assignments":  {
+                                                             "assignments":  [
+                                                                                 {
+                                                                                     "id":  "rid-city-1",
+                                                                                     "name":  "run_id",
+                                                                                     "value":  "={{ $json.data.id }}",
+                                                                                     "type":  "string"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "rid-city-2",
+                                                                                     "name":  "poll_attempts",
+                                                                                     "value":  0,
+                                                                                     "type":  "number"
+                                                                                 }
+                                                                             ]
+                                                         },
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "id":  "044b285c-0b65-4aae-b8d1-8155aa5701b0",
+                      "name":  "Store Run ID (City)",
+                      "type":  "n8n-nodes-base.set",
+                      "typeVersion":  3.4,
+                      "position":  [
+                                       7904,
+                                       3984
+                                   ]
+                  },
+                  {
+                      "parameters":  {
+                                         "amount":  40
+                                     },
+                      "id":  "72f65d97-1544-46e3-ab96-9db3573e8a95",
+                      "name":  "Wait Before Poll (City)",
+                      "type":  "n8n-nodes-base.wait",
+                      "typeVersion":  1.1,
+                      "position":  [
+                                       8112,
+                                       3984
+                                   ],
+                      "webhookId":  "wait-leads-finder-city-001"
+                  },
+                  {
+                      "parameters":  {
+                                         "url":  "=https://api.apify.com/v2/actor-runs/{{ $(\u0027Store Run ID (City)\u0027).item.json.run_id }}",
+                                         "sendHeaders":  true,
+                                         "headerParameters":  {
+                                                                  "parameters":  [
+                                                                                     {
+                                                                                         "name":  "Authorization",
+                                                                                         "value":  "Bearer {{ $env.APIFY_API_TOKEN }}"
+                                                                                     }
+                                                                                 ]
+                                                              },
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "id":  "fa033f80-44b3-4883-baa8-28e12ba9b3dc",
+                      "name":  "Check Run Status (City)",
+                      "type":  "n8n-nodes-base.httpRequest",
+                      "typeVersion":  4.4,
+                      "position":  [
+                                       8304,
+                                       3984
+                                   ]
+                  },
+                  {
+                      "parameters":  {
+                                         "jsCode":  "const attempts = ($input.item.json.poll_attempts || 0) + 1;\nreturn [{ json: { ...$input.item.json, poll_attempts: attempts } }];"
+                                     },
+                      "id":  "d01aa313-4023-4f8f-86b0-9e786bf13c3b",
+                      "name":  "Increment Poll Counter (City)",
+                      "type":  "n8n-nodes-base.code",
+                      "typeVersion":  2,
+                      "position":  [
+                                       8496,
+                                       3984
+                                   ]
+                  },
+                  {
+                      "parameters":  {
+                                         "conditions":  {
+                                                            "options":  {
+                                                                            "caseSensitive":  true,
+                                                                            "leftValue":  "",
+                                                                            "typeValidation":  "loose",
+                                                                            "version":  3
+                                                                        },
+                                                            "conditions":  [
+                                                                               {
+                                                                                   "id":  "cond-succeeded-city",
+                                                                                   "leftValue":  "={{ $json.data.status }}",
+                                                                                   "rightValue":  "SUCCEEDED",
+                                                                                   "operator":  {
+                                                                                                    "type":  "string",
+                                                                                                    "operation":  "equals"
+                                                                                                }
+                                                                               }
+                                                                           ],
+                                                            "combinator":  "or"
+                                                        },
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "id":  "bcf8bbd5-4cf9-4ece-ad6d-6b056491d961",
+                      "name":  "Run Succeeded? (City)",
+                      "type":  "n8n-nodes-base.if",
+                      "typeVersion":  2.3,
+                      "position":  [
+                                       8688,
+                                       3984
+                                   ]
+                  },
+                  {
+                      "parameters":  {
+                                         "conditions":  {
+                                                            "options":  {
+                                                                            "caseSensitive":  true,
+                                                                            "leftValue":  "",
+                                                                            "typeValidation":  "loose",
+                                                                            "version":  3
+                                                                        },
+                                                            "conditions":  [
+                                                                               {
+                                                                                   "id":  "cond-maxpolls-city",
+                                                                                   "leftValue":  "={{ $json.poll_attempts }}",
+                                                                                   "rightValue":  10,
+                                                                                   "operator":  {
+                                                                                                    "type":  "number",
+                                                                                                    "operation":  "gte"
+                                                                                                }
+                                                                               }
+                                                                           ],
+                                                            "combinator":  "or"
+                                                        },
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "id":  "c9611076-a4d8-4897-856b-6088fc86bbbc",
+                      "name":  "Exceeded Max Polls? (City)",
+                      "type":  "n8n-nodes-base.if",
+                      "typeVersion":  2.3,
+                      "position":  [
+                                       8912,
+                                       4144
+                                   ]
+                  },
+                  {
+                      "parameters":  {
+                                         "url":  "=https://api.apify.com/v2/actor-runs/{{ $(\u0027Store Run ID (City)\u0027).item.json.run_id }}/dataset/items",
+                                         "sendHeaders":  true,
+                                         "headerParameters":  {
+                                                                  "parameters":  [
+                                                                                     {
+                                                                                         "name":  "Authorization",
+                                                                                         "value":  "Bearer {{ $env.APIFY_API_TOKEN }}"
+                                                                                     }
+                                                                                 ]
+                                                              },
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "id":  "741f0a12-12d7-4665-819a-446d4dbea115",
+                      "name":  "Get Leads Results (City)",
+                      "type":  "n8n-nodes-base.httpRequest",
+                      "typeVersion":  4.4,
+                      "position":  [
+                                       9152,
+                                       3968
+                                   ]
+                  },
+                  {
+                      "parameters":  {
+                                         "mode":  "raw",
+                                         "jsonOutput":  "{\n  \"event_type\":        \"lead_created\",\n  \"agent_source\":      \"lead_management\",\n  \"lead_id\":            \"={{$json.lead_id}}\",\n  \"data.email\":                 \"={{$json.Email}}\",\n  \"data.company\":               \"={{$json.company_name}}\",\n  \"data.contact_name\":          \"={{ $json[\\\"Contact Name\\\"] }}\",\n  \"data.designation\":           \"={{ $json[\\\"Designation\\\"] }}\",\n  \"data.industry\":              \"={{$json.Industry}}\",\n  \"data.website\":                \"={{$json.Website}}\",\n  \"data.linkedin\":               \"={{ $json[\\\"LinkedIn\\\"] }}\",\n  \"data.location\":                \"={{ $json[\\\"Location\\\"] }}\",\n  \"data.country\":                 \"={{ $json[\\\"Country\\\"] }}\",\n  \"data.company_size\":           \"={{ $json[\\\"Company Size\\\"] }}\",\n  \"data.score\":                  \"={{ $json[\\\"Lead Score\\\"] }}\",\n  \"data.priority\":                \"={{ $json[\\\"Priority\\\"] }}\",\n  \"data.icp_match\":               \"={{ $json[\\\"ICP Match\\\"] }}\",\n  \"data.icp_tier\":                \"={{$json.icp_tier}}\",\n  \"data.seniority\":               \"={{$json.seniority}}\",\n  \"data.ai_insight\":              \"={{ $json[\\\"AI Insight\\\"] }}\",\n  \"data.personalization_hook\":    \"={{$json.personalization_hook}}\",\n  \"data.recommended_action\":      \"={{$json.recommended_action}}\",\n  \"data.pain_points_matched\":     \"={{$json.pain_points_matched}}\",\n  \"data.founded_year\":            \"={{$json.founded_year}}\",\n  \"data.company_description\":     \"={{ $json[\\\"Company Description\\\"] }}\",\n  \"data.status\":                   \"Qualified\",\n  \"data.timestamp\":                \"={{$now.toISO()}}\"\n}",
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "type":  "n8n-nodes-base.set",
+                      "typeVersion":  3.4,
+                      "position":  [
+                                       11200,
+                                       4224
+                                   ],
+                      "id":  "27d4e734-07e5-44e8-8fcf-657eac985920",
+                      "name":  "Edit Fields1"
+                  },
+                  {
+                      "parameters":  {
+                                         "method":  "POST",
+                                         "url":  "https://n8n-smady-adgtdkg5hvacf7fs.canadacentral-01.azurewebsites.net/webhook/crm-agent",
+                                         "sendBody":  true,
+                                         "specifyBody":  "json",
+                                         "jsonBody":  "={\n  \"event_type\": \"{{$json.event_type}}\",\n  \"agent_source\": \"{{$json.agent_source}}\",\n  \"lead_id\": \"{{$json.lead_id}}\",\n  \"data\": {\n    \"email\": \"{{$json.data.email}}\",\n    \"company\": \"{{$json.data.company}}\",\n    \"contact_name\": \"{{$json.data.contact_name}}\",\n    \"designation\": \"{{$json.data.designation}}\",\n    \"industry\": \"{{$json.data.industry}}\",\n    \"website\": \"{{$json.data.website}}\",\n    \"linkedin\": \"{{$json.data.linkedin}}\",\n    \"location\": \"{{$json.data.location}}\",\n    \"country\": \"{{$json.data.country}}\",\n    \"company_size\": \"{{$json.data.company_size}}\",\n    \"score\": \"{{$json.data.score}}\",\n    \"priority\": \"{{$json.data.priority}}\",\n    \"icp_match\": \"{{$json.data.icp_match}}\",\n    \"icp_tier\": \"{{$json.data.icp_tier}}\",\n    \"seniority\": \"{{$json.data.seniority}}\",\n    \"ai_insight\": \"{{$json.data.ai_insight}}\",\n    \"personalization_hook\": \"{{$json.data.personalization_hook}}\",\n    \"recommended_action\": \"{{$json.data.recommended_action}}\",\n    \"pain_points_matched\": \"{{$json.data.pain_points_matched}}\",\n    \"founded_year\": \"{{$json.data.founded_year}}\",\n    \"company_description\": \"{{$json.data.company_description}}\",\n    \"status\": \"{{$json.data.status}}\",\n    \"timestamp\": \"{{$json.data.timestamp}}\"\n  }\n}",
+                                         "options":  {
+                                                         "timeout":  900000
+                                                     }
+                                     },
+                      "type":  "n8n-nodes-base.httpRequest",
+                      "typeVersion":  4.4,
+                      "position":  [
+                                       11408,
+                                       4224
+                                   ],
+                      "id":  "3fcbc07c-8579-43fc-9c6f-8e444f866f4c",
+                      "name":  "HTTP Request",
+                      "onError":  "continueRegularOutput"
+                  },
+                  {
+                      "parameters":  {
+                                         "operation":  "executeQuery",
+                                         "query":  "INSERT INTO Agent1 (\n  request_id,\n  lead_id,\n  date,\n  company_name,\n  industry,\n  company_size,\n  location,\n  contact_name,\n  designation,\n  website,\n  email,\n  linkedin,\n  icp_match,\n  lead_score,\n  priority,\n  ai_insight\n)\nVALUES (\n  $1, $2, NOW(), $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15\n)",
+                                         "options":  {
+                                                         "queryReplacement":  "={{ $(\u0027Build Outreach Payload\u0027).item.json.request_id }}, {{ $json[\u0027Lead ID\u0027] }}, {{ $json[\u0027Company Name\u0027] }}, {{ $json[\u0027Industry\u0027] }}, {{ $json[\u0027Company Size\u0027] }}, {{ $json[\u0027Location\u0027] }}, {{ $json[\u0027Contact Name\u0027] }}, {{ $json[\u0027Designation\u0027] }}, {{ $json[\u0027Website\u0027] }}, {{ $json[\u0027Email\u0027] }}, {{ $json[\u0027LinkedIn\u0027] }}, {{ $json[\u0027ICP Match\u0027] }}, {{ $json[\u0027Lead Score\u0027] }}, {{ $json[\u0027Priority\u0027] }}, {{ $json[\u0027AI Insight\u0027] }}"
+                                                     }
+                                     },
+                      "type":  "n8n-nodes-base.postgres",
+                      "typeVersion":  2.1,
+                      "position":  [
+                                       12304,
+                                       4480
+                                   ],
+                      "id":  "1813f2b9-3256-4acd-814b-1fcd1d6bb3ff",
+                      "name":  "Insert Leads into Agent1",
+                      "credentials":  {
+                                          "postgres":  {
+                                                           "id":  "Q2ANOItnycod3cGQ",
+                                                           "name":  "Postgres account"
+                                                       }
+                                      }
+                  },
+                  {
+                      "parameters":  {
+                                         "operation":  "executeQuery",
+                                         "query":  "ALTER TABLE Agent1 ALTER COLUMN request_id TYPE text;",
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "type":  "n8n-nodes-base.postgres",
+                      "typeVersion":  2.7,
+                      "position":  [
+                                       11728,
+                                       3744
+                                   ],
+                      "id":  "d0872756-3970-4605-bea9-7a37924130ba",
+                      "name":  "Execute a SQL query",
+                      "credentials":  {
+                                          "postgres":  {
+                                                           "id":  "Q2ANOItnycod3cGQ",
+                                                           "name":  "Postgres account"
+                                                       }
+                                      }
+                  },
+                  {
+                      "parameters":  {
+                                         "mode":  "runOnceForAllItems",
+                                         "jsCode":  "const leads = $(\u0027Build Outreach Payload\u0027).all().map(({ json }) =\u003e ({\n  company_name: json[\u0027Company Name\u0027] || json.company_name || \u0027\u0027,\n  contact_name: json[\u0027Contact Name\u0027] || json.contact_name || \u0027\u0027,\n  job_title: json[\u0027Designation\u0027] || json.job_title || \u0027\u0027,\n  email: json[\u0027Email\u0027] || json.email || \u0027\u0027,\n  location: json[\u0027Location\u0027] || json.location || \u0027\u0027,\n  industry: json[\u0027Industry\u0027] || json.industry || \u0027\u0027,\n  lead_score: json[\u0027Lead Score\u0027] || json.lead_score || null,\n  priority: json[\u0027Priority\u0027] || json.priority || \u0027\u0027\n}));\nconst request = $(\u0027Parse ICP Payload\u0027).first().json;\n\nreturn [{ json: {\n  status: \u0027completed\u0027,\n  request_id: request.request_id || \u0027\u0027,\n  total_count: leads.length,\n  leads\n} }];"
+                                     },
+                      "type":  "n8n-nodes-base.code",
+                      "typeVersion":  2,
+                      "position":  [
+                                       12768,
+                                       4224
+                                   ],
+                      "id":  "3fca6d97-cd60-4a5e-9b98-a2f2012ae2c4",
+                      "name":  "Prepare Webhook Response"
+                  },
+                  {
+                      "parameters":  {
+                                         "respondWith":  "json",
+                                         "responseBody":  "={{ $json }}",
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "type":  "n8n-nodes-base.respondToWebhook",
+                      "typeVersion":  1.4,
+                      "position":  [
+                                       13008,
+                                       4224
+                                   ],
+                      "id":  "a43c1ec2-a5d2-4e87-9bc4-0604f7c416e6",
+                      "name":  "Respond to Webhook"
+                  }
+              ],
+    "connections":  {
+                        "Start Leads Finder":  {
+                                                   "main":  [
+                                                                [
+                                                                    {
+                                                                        "node":  "Store Run ID",
+                                                                        "type":  "main",
+                                                                        "index":  0
+                                                                    }
+                                                                ]
+                                                            ]
+                                               },
+                        "Store Run ID":  {
+                                             "main":  [
+                                                          [
+                                                              {
+                                                                  "node":  "Wait Before Poll",
+                                                                  "type":  "main",
+                                                                  "index":  0
+                                                              }
+                                                          ]
+                                                      ]
+                                         },
+                        "Wait Before Poll":  {
+                                                 "main":  [
+                                                              [
+                                                                  {
+                                                                      "node":  "Check Run Status",
+                                                                      "type":  "main",
+                                                                      "index":  0
+                                                                  }
+                                                              ]
+                                                          ]
+                                             },
+                        "Check Run Status":  {
+                                                 "main":  [
+                                                              [
+                                                                  {
+                                                                      "node":  "Increment Poll Counter",
+                                                                      "type":  "main",
+                                                                      "index":  0
+                                                                  }
+                                                              ]
+                                                          ]
+                                             },
+                        "Increment Poll Counter":  {
+                                                       "main":  [
+                                                                    [
+                                                                        {
+                                                                            "node":  "Run Succeeded?",
+                                                                            "type":  "main",
+                                                                            "index":  0
+                                                                        }
+                                                                    ]
+                                                                ]
+                                                   },
+                        "Run Succeeded?":  {
+                                               "main":  [
+                                                            [
+                                                                {
+                                                                    "node":  "Get Leads Results",
+                                                                    "type":  "main",
+                                                                    "index":  0
+                                                                }
+                                                            ],
+                                                            [
+                                                                {
+                                                                    "node":  "Exceeded Max Polls?",
+                                                                    "type":  "main",
+                                                                    "index":  0
+                                                                }
+                                                            ]
+                                                        ]
+                                           },
+                        "Exceeded Max Polls?":  {
+                                                    "main":  [
+                                                                 [
+                                                                     {
+                                                                         "node":  "Get Leads Results",
+                                                                         "type":  "main",
+                                                                         "index":  0
+                                                                     }
+                                                                 ],
+                                                                 [
+                                                                     {
+                                                                         "node":  "Wait Before Poll",
+                                                                         "type":  "main",
+                                                                         "index":  0
+                                                                     }
+                                                                 ]
+                                                             ]
+                                                },
+                        "Get Leads Results":  {
+                                                  "main":  [
+                                                               [
+                                                                   {
+                                                                       "node":  "Filter \u0026 Clean Leads",
+                                                                       "type":  "main",
+                                                                       "index":  0
+                                                                   }
+                                                               ]
+                                                           ]
+                                              },
+                        "Filter \u0026 Clean Leads":  {
+                                                          "main":  [
+                                                                       [
+                                                                           {
+                                                                               "node":  "Message a model1",
+                                                                               "type":  "main",
+                                                                               "index":  0
+                                                                           }
+                                                                       ]
+                                                                   ]
+                                                      },
+                        "IF: Valid Lead":  {
+                                               "main":  [
+                                                            [
+                                                                {
+                                                                    "node":  "Format Lead Data",
+                                                                    "type":  "main",
+                                                                    "index":  0
+                                                                }
+                                                            ]
+                                                        ]
+                                           },
+                        "Format Lead Data":  {
+                                                 "main":  [
+                                                              [
+                                                                  {
+                                                                      "node":  "Edit Fields1",
+                                                                      "type":  "main",
+                                                                      "index":  0
+                                                                  }
+                                                              ]
+                                                          ]
+                                             },
+                        "Append row in sheet1":  {
+                                                     "main":  [
+                                                                  [
+                                                                      {
+                                                                          "node":  "Insert Leads into Agent1",
+                                                                          "type":  "main",
+                                                                          "index":  0
+                                                                      }
+                                                                  ]
+                                                              ]
+                                                 },
+                        "Build Outreach Payload":  {
+                                                       "main":  [
+                                                                    [
+                                                                        {
+                                                                            "node":  "Prepare Webhook Response",
+                                                                            "type":  "main",
+                                                                            "index":  0
+                                                                        },
+                                                                        {
+                                                                            "node":  "Append row in sheet1",
+                                                                            "type":  "main",
+                                                                            "index":  0
+                                                                        }
+                                                                    ]
+                                                                ]
+                                                   },
+                        "Webhook":  {
+                                        "main":  [
+                                                     [
+                                                         {
+                                                             "node":  "Parse ICP Payload",
+                                                             "type":  "main",
+                                                             "index":  0
+                                                         }
+                                                     ]
+                                                 ]
+                                    },
+                        "When clicking \u0027Execute workflow\u0027":  {
+                                                                           "main":  [
+                                                                                        [
+                                                                                            {
+                                                                                                "node":  "Edit Fields",
+                                                                                                "type":  "main",
+                                                                                                "index":  0
+                                                                                            }
+                                                                                        ]
+                                                                                    ]
+                                                                       },
+                        "Edit Fields":  {
+                                            "main":  [
+                                                         [
+                                                             {
+                                                                 "node":  "Parse ICP Payload",
+                                                                 "type":  "main",
+                                                                 "index":  0
+                                                             }
+                                                         ]
+                                                     ]
+                                        },
+                        "Parse AI Score":  {
+                                               "main":  [
+                                                            [
+                                                                {
+                                                                    "node":  "IF: Score \u003e= 50",
+                                                                    "type":  "main",
+                                                                    "index":  0
+                                                                }
+                                                            ]
+                                                        ]
+                                           },
+                        "IF: Score \u003e= 50":  {
+                                                     "main":  [
+                                                                  [
+                                                                      {
+                                                                          "node":  "IF: Valid Lead",
+                                                                          "type":  "main",
+                                                                          "index":  0
+                                                                      }
+                                                                  ]
+                                                              ]
+                                                 },
+                        "Message a model1":  {
+                                                 "main":  [
+                                                              [
+                                                                  {
+                                                                      "node":  "Parse AI Score",
+                                                                      "type":  "main",
+                                                                      "index":  0
+                                                                  }
+                                                              ]
+                                                          ]
+                                             },
+                        "Parse ICP Payload":  {
+                                                  "main":  [
+                                                               [
+                                                                   {
+                                                                       "node":  "Prepare Search Parameters",
+                                                                       "type":  "main",
+                                                                       "index":  0
+                                                                   }
+                                                               ]
+                                                           ]
+                                              },
+                        "Prepare Search Parameters":  {
+                                                          "main":  [
+                                                                       [
+                                                                           {
+                                                                               "node":  "IF: City-Specific ICP?",
+                                                                               "type":  "main",
+                                                                               "index":  0
+                                                                           }
+                                                                       ]
+                                                                   ]
+                                                      },
+                        "IF: City-Specific ICP?":  {
+                                                       "main":  [
+                                                                    [
+                                                                        {
+                                                                            "node":  "Start Leads Finder (City)",
+                                                                            "type":  "main",
+                                                                            "index":  0
+                                                                        }
+                                                                    ],
+                                                                    [
+                                                                        {
+                                                                            "node":  "Start Leads Finder",
+                                                                            "type":  "main",
+                                                                            "index":  0
+                                                                        }
+                                                                    ]
+                                                                ]
+                                                   },
+                        "Start Leads Finder (City)":  {
+                                                          "main":  [
+                                                                       [
+                                                                           {
+                                                                               "node":  "Store Run ID (City)",
+                                                                               "type":  "main",
+                                                                               "index":  0
+                                                                           }
+                                                                       ]
+                                                                   ]
+                                                      },
+                        "Store Run ID (City)":  {
+                                                    "main":  [
+                                                                 [
+                                                                     {
+                                                                         "node":  "Wait Before Poll (City)",
+                                                                         "type":  "main",
+                                                                         "index":  0
+                                                                     }
+                                                                 ]
+                                                             ]
+                                                },
+                        "Wait Before Poll (City)":  {
+                                                        "main":  [
+                                                                     [
+                                                                         {
+                                                                             "node":  "Check Run Status (City)",
+                                                                             "type":  "main",
+                                                                             "index":  0
+                                                                         }
+                                                                     ]
+                                                                 ]
+                                                    },
+                        "Check Run Status (City)":  {
+                                                        "main":  [
+                                                                     [
+                                                                         {
+                                                                             "node":  "Increment Poll Counter (City)",
+                                                                             "type":  "main",
+                                                                             "index":  0
+                                                                         }
+                                                                     ]
+                                                                 ]
+                                                    },
+                        "Increment Poll Counter (City)":  {
+                                                              "main":  [
+                                                                           [
+                                                                               {
+                                                                                   "node":  "Run Succeeded? (City)",
+                                                                                   "type":  "main",
+                                                                                   "index":  0
+                                                                               }
+                                                                           ]
+                                                                       ]
+                                                          },
+                        "Run Succeeded? (City)":  {
+                                                      "main":  [
+                                                                   [
+                                                                       {
+                                                                           "node":  "Get Leads Results (City)",
+                                                                           "type":  "main",
+                                                                           "index":  0
+                                                                       }
+                                                                   ],
+                                                                   [
+                                                                       {
+                                                                           "node":  "Exceeded Max Polls? (City)",
+                                                                           "type":  "main",
+                                                                           "index":  0
+                                                                       }
+                                                                   ]
+                                                               ]
+                                                  },
+                        "Exceeded Max Polls? (City)":  {
+                                                           "main":  [
+                                                                        [
+                                                                            {
+                                                                                "node":  "Get Leads Results (City)",
+                                                                                "type":  "main",
+                                                                                "index":  0
+                                                                            }
+                                                                        ],
+                                                                        [
+                                                                            {
+                                                                                "node":  "Wait Before Poll (City)",
+                                                                                "type":  "main",
+                                                                                "index":  0
+                                                                            }
+                                                                        ]
+                                                                    ]
+                                                       },
+                        "Get Leads Results (City)":  {
+                                                         "main":  [
+                                                                      [
+                                                                          {
+                                                                              "node":  "Filter \u0026 Clean Leads",
+                                                                              "type":  "main",
+                                                                              "index":  0
+                                                                          }
+                                                                      ]
+                                                                  ]
+                                                     },
+                        "Edit Fields1":  {
+                                             "main":  [
+                                                          [
+                                                              {
+                                                                  "node":  "HTTP Request",
+                                                                  "type":  "main",
+                                                                  "index":  0
+                                                              }
+                                                          ]
+                                                      ]
+                                         },
+                        "HTTP Request":  {
+                                             "main":  [
+                                                          [
+                                                              {
+                                                                  "node":  "Build Outreach Payload",
+                                                                  "type":  "main",
+                                                                  "index":  0
+                                                              }
+                                                          ]
+                                                      ]
+                                         },
+                        "Insert Leads into Agent1":  {
+                                                         "main":  [
+                                                                      [
+                                                                          {
+                                                                              "node":  "Notify Bridge - Lead Gen Complete",
+                                                                              "type":  "main",
+                                                                              "index":  0
+                                                                          }
+                                                                      ]
+                                                                  ]
+                                                     },
+                        "Prepare Webhook Response":  { "main": [ { "node": "Respond to Webhook", "type": "main", "index": 0 } ] }
+                    },
+    "pinData":  {
+
+                },
+    "meta":  {
+                 "templateCredsSetupCompleted":  true,
+                 "instanceId":  "5505ae3ae5efbb9d8f9a82fdeda0abf3c231c29868e725b029760b471fbe6639"
+             }
+}

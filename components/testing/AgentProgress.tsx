@@ -44,6 +44,7 @@ export default function AgentProgress({
   const [execState, setExecState] = useState<ExecutionState>('idle');
   const [execError, setExecError] = useState<ExecutionError | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const runStartingRef = useRef(false);
 
   // Subscribe to runner events
   useEffect(() => {
@@ -166,6 +167,9 @@ export default function AgentProgress({
   }, [execution?.status]);
 
   const handleRun = useCallback(async () => {
+    if (runStartingRef.current || runner.isRunning) return;
+    runStartingRef.current = true;
+
     // Always start by showing progress state
     setView('console');
     setExecState('running');
@@ -193,6 +197,7 @@ export default function AgentProgress({
         });
         setExecState('failed');
       } finally {
+        runStartingRef.current = false;
         onRunningChange?.(false);
       }
       return;
@@ -216,6 +221,8 @@ export default function AgentProgress({
       });
       setExecState('failed');
       onRunningChange?.(false);
+    } finally {
+      runStartingRef.current = false;
     }
   }, [agentId, icpFormData, onPrepareRun, payload, onRunningChange, onICPResult]);
 

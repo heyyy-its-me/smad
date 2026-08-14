@@ -138,6 +138,12 @@ export class AgentRunner {
    * @param payload - Optional custom input payload to send to the backend
    */
   async start(agentId: string, payload?: Record<string, unknown>): Promise<AgentExecution> {
+    if (this.executionState === 'running' || this.execution?.status === 'running') {
+      this.log('warn', 'Run request ignored because an execution is already running.');
+      if (this.execution) return this.execution;
+      throw new Error('An execution is already running');
+    }
+
     this.cancel(); // clean up previous run
     this.cancelled = false;
     this.executionError = null;

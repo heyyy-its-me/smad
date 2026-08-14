@@ -13,12 +13,13 @@ if (!connectionString.includes('sslmode=')) {
   connectionString = `${connectionString}${separator}sslmode=require`;
 }
 
-// Initialize PostgreSQL connection pool
+console.log('[Database] Connecting with SSL enforcement...');
+
+// Initialize PostgreSQL connection pool with explicit SSL configuration
 const pool = new Pool({
   connectionString,
-  ssl: {
-    rejectUnauthorized: false, // Required for AWS RDS self-signed certificates
-  },
+  ssl: true, // Force SSL - AWS RDS requires this
+  application_name: 'smad-next-js',
 });
 
 pool.on('error', (err) => {

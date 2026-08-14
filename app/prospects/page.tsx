@@ -198,19 +198,19 @@ export default function ProspectsPage() {
                     <div style={{ background: 'rgba(59, 130, 246, 0.1)', padding: '12px', borderRadius: '8px' }}>
                       <p style={{ margin: '0 0 4px', fontSize: '12px', color: '#9ca3af' }}>Pain Severity</p>
                       <p style={{ margin: 0, fontSize: '24px', fontWeight: 700, color: '#3b82f6' }}>
-                        {(profile.icp_data as Record<string, unknown>).pain_severity}/10
+                        {String((profile.icp_data as Record<string, unknown>).pain_severity)}/10
                       </p>
                     </div>
                     <div style={{ background: 'rgba(59, 130, 246, 0.1)', padding: '12px', borderRadius: '8px' }}>
                       <p style={{ margin: '0 0 4px', fontSize: '12px', color: '#9ca3af' }}>Market Size</p>
                       <p style={{ margin: 0, fontSize: '24px', fontWeight: 700, color: '#3b82f6' }}>
-                        {(profile.icp_data as Record<string, unknown>).market_size}/10
+                        {String((profile.icp_data as Record<string, unknown>).market_size)}/10
                       </p>
                     </div>
                     <div style={{ background: 'rgba(59, 130, 246, 0.1)', padding: '12px', borderRadius: '8px' }}>
                       <p style={{ margin: '0 0 4px', fontSize: '12px', color: '#9ca3af' }}>Ease of Sales</p>
                       <p style={{ margin: 0, fontSize: '24px', fontWeight: 700, color: '#3b82f6' }}>
-                        {(profile.icp_data as Record<string, unknown>).ease_of_sales}/10
+                        {String((profile.icp_data as Record<string, unknown>).ease_of_sales)}/10
                       </p>
                     </div>
                   </div>

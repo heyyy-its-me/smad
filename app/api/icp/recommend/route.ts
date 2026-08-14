@@ -1,4 +1,5 @@
 import { requireAuth } from '@/lib/auth/session';
+import { execute } from '@/lib/db';
 
 export async function POST(request: Request) {
   let auth;
@@ -49,6 +50,52 @@ export async function POST(request: Request) {
 
       const data = await response.json();
       console.log('[ICP Proxy] Success:', data);
+
+      // Save company profile and analysis data
+      if (data.analysis && body.company_name && body.product_name) {
+        try {
+          const analysis = data.analysis;
+          await execute(
+            `INSERT INTO company_profiles (
+               customer_id, company_name, product_name, positioning, differentiator,
+               core_problem, buyer_pain, target_segment, confidence_score,
+               icp_data, gtm_strategy, buyer_persona
+             ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+             ON CONFLICT (customer_id) DO UPDATE SET
+               company_name = $2,
+               product_name = $3,
+               positioning = $4,
+               differentiator = $5,
+               core_problem = $6,
+               buyer_pain = $7,
+               target_segment = $8,
+               confidence_score = $9,
+               icp_data = $10,
+               gtm_strategy = $11,
+               buyer_persona = $12,
+               updated_at = CURRENT_TIMESTAMP`,
+            [
+              auth.customer_id,
+              body.company_name,
+              body.product_name,
+              analysis.positioning || null,
+              analysis.differentiator || null,
+              analysis.core_problem || null,
+              analysis.buyer_pain || null,
+              analysis.recommended_segment || null,
+              data.confidence_score || null,
+              JSON.stringify(data.primary_icp || null),
+              JSON.stringify(data.gtm_strategy || null),
+              JSON.stringify(data.buyer_persona || null),
+            ]
+          );
+          console.log('[ICP Proxy] Profile saved for customer:', auth.customer_id);
+        } catch (saveError) {
+          console.error('[ICP Proxy] Failed to save profile:', saveError);
+          // Don't fail the request, just log the error
+        }
+      }
+
       return Response.json(data);
     } catch (fetchError) {
       clearTimeout(timeoutId);

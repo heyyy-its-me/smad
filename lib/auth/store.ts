@@ -32,7 +32,21 @@ let pool: Pool | null = null;
 function getPool(): Pool | null {
   if (!process.env.DATABASE_URL) return null;
   if (!pool) {
-    pool = new Pool({ connectionString: process.env.DATABASE_URL });
+    // Add sslmode=require to connection string if needed
+    let connectionString = process.env.DATABASE_URL;
+    if (!connectionString.includes('sslmode=')) {
+      const separator = connectionString.includes('?') ? '&' : '?';
+      connectionString = `${connectionString}${separator}sslmode=require`;
+    }
+    
+    // Create pool with SSL configuration for AWS RDS
+    pool = new Pool({
+      connectionString,
+      ssl: {
+        rejectUnauthorized: false, // Accept self-signed certificates from AWS RDS
+        minVersion: 'TLSv1.2',
+      },
+    });
   }
   return pool;
 }

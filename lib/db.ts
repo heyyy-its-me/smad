@@ -13,13 +13,18 @@ if (!connectionString.includes('sslmode=')) {
   connectionString = `${connectionString}${separator}sslmode=require`;
 }
 
-console.log('[Database] Connecting with SSL enforcement...');
+if (process.env.NODE_ENV === 'development') {
+  console.log('[Database] Connecting with SSL enforcement...');
+  console.log('[Database] Connection string includes sslmode:', connectionString.includes('sslmode'));
+}
 
-// Initialize PostgreSQL connection pool with explicit SSL configuration
+// Initialize PostgreSQL connection pool with SSL
+// AWS RDS requires SSL encryption - must accept self-signed certificates
 const pool = new Pool({
   connectionString,
   ssl: {
-    rejectUnauthorized: false, // AWS RDS uses self-signed certificates
+    rejectUnauthorized: false, // CRITICAL: Accept self-signed certificates from AWS RDS
+    minVersion: 'TLSv1.2',
   },
   application_name: 'smad-next-js',
 });

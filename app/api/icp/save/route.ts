@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getTokenFromRequest, requireAuth } from '@/lib/auth/session';
+import { requireAuth } from '@/lib/auth/session';
 import { query, execute } from '@/lib/db';
 
 export const runtime = 'nodejs';

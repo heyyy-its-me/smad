@@ -29,33 +29,33 @@ export default function ProspectsPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchProfile();
-  }, []);
-
-  const fetchProfile = async () => {
-    try {
-      const response = await fetch('/api/icp/profile');
-      if (!response.ok) {
-        if (response.status === 401) {
-          router.push('/');
-          return;
+    const fetchProfile = async () => {
+      try {
+        const response = await fetch('/api/icp/profile');
+        if (!response.ok) {
+          if (response.status === 401) {
+            router.push('/');
+            return;
+          }
+          throw new Error('Failed to fetch profile');
         }
-        throw new Error('Failed to fetch profile');
-      }
 
-      const data = await response.json();
-      setProfile(data.profile);
-      setError(null);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
-    } finally {
-      setLoading(false);
-    }
-  };
+        const data = await response.json();
+        setProfile(data.profile);
+        setError(null);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'An error occurred');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfile();
+  }, [router]);
 
   return (
     <div style={{ display: 'flex', height: '100vh', background: '#0f0f23' }}>
-      <Sidebar sidebarView="studio" onSidebarChange={() => {}} />
+      <Sidebar activeView="studio" onViewChange={() => {}} />
       
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
         <TopBar />

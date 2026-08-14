@@ -18,7 +18,9 @@ console.log('[Database] Connecting with SSL enforcement...');
 // Initialize PostgreSQL connection pool with explicit SSL configuration
 const pool = new Pool({
   connectionString,
-  ssl: true, // Force SSL - AWS RDS requires this
+  ssl: {
+    rejectUnauthorized: false, // AWS RDS uses self-signed certificates
+  },
   application_name: 'smad-next-js',
 });
 

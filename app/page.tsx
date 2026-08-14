@@ -54,23 +54,67 @@ const initialICPForm: ICPRequestPayload = {
 const split = (value: string) =>
   value.split(",").map((part) => part.trim()).filter(Boolean);
 
-const buildLeadPayload = (form: LeadFormData, requestId: string) => ({
-  request_id: requestId,
-  industry: split(form.industry),
-  target_industries: form.industry,
-  roles: split(form.roles),
-  job_titles: form.roles,
-  region: split(form.region),
-  priority_regions: form.region,
-  countries: split(form.region),
-  cities: split(form.cities),
-  priority_cities: form.cities,
-  states: split(form.states),
-  priority_states: form.states,
-  company_size: split(form.company_size),
-  ideal_company_size: form.company_size,
-  business_context: form.business_context,
-});
+const buildLeadPayload = (
+  form: LeadFormData,
+  requestId: string,
+  icpForm: ICPRequestPayload,
+  icpResult: ICPRecommendationResponse | null,
+) => {
+  const analysis = icpResult?.analysis;
+  const buyerPersona = icpResult?.buyer_persona;
+  const painPoints = [
+    ...(buyerPersona?.pain_points ?? []),
+    analysis?.core_problem,
+    analysis?.buyer_pain,
+  ].filter((value): value is string => Boolean(value?.trim()));
+
+  return {
+    request_id: requestId,
+    industry: split(form.industry),
+    target_industries: form.industry,
+    roles: split(form.roles),
+    job_titles: form.roles,
+    region: split(form.region),
+    priority_regions: form.region,
+    countries: split(form.region),
+    cities: split(form.cities),
+    priority_cities: form.cities,
+    states: split(form.states),
+    priority_states: form.states,
+    company_size: split(form.company_size),
+    ideal_company_size: form.company_size,
+    business_context: form.business_context,
+
+    // ICP context gives Lead Management the details needed to qualify and personalise leads.
+    company_name: analysis?.company_name || icpForm.company_name || '',
+    product_name: analysis?.product_name || icpForm.product_name || '',
+    product_description: icpForm.product_description,
+    positioning: analysis?.positioning || '',
+    differentiator: analysis?.differentiator || '',
+    core_problem: analysis?.core_problem || '',
+    buyer_pain: analysis?.buyer_pain || '',
+    pain_points: [...new Set(painPoints)].join(', '),
+    business_goals: (buyerPersona?.goals ?? []).join(', '),
+    target_market: analysis?.recommended_segment || '',
+    primary_icp: icpResult?.primary_icp?.icp || '',
+    secondary_icps: (icpResult?.secondary_icps ?? []).map(({ icp }) => icp).join(', '),
+    technical_complexity: analysis?.technical_complexity || '',
+    recommended_channels: (icpResult?.gtm_strategy?.recommended_channels ?? []).join(', '),
+    confidence_score: icpResult?.confidence_score ?? null,
+
+    // Keep the complete source analysis available to the workflow as structured data.
+    icp_context: icpResult
+      ? {
+          analysis,
+          buyer_persona: buyerPersona,
+          gtm_strategy: icpResult.gtm_strategy,
+          primary_icp: icpResult.primary_icp,
+          secondary_icps: icpResult.secondary_icps,
+          confidence_score: icpResult.confidence_score,
+        }
+      : null,
+  };
+};
 
 export default function Home() {
   const [active, setActive] = useState("leads");
@@ -87,15 +131,15 @@ export default function Home() {
   const agent = agents.find((item) => item.id === active) ?? agents[1];
 
   const leadPayload = useMemo(
-    () => buildLeadPayload(leadForm, requestId),
-    [leadForm, requestId]
+    () => buildLeadPayload(leadForm, requestId, icpForm, icpResult),
+    [leadForm, requestId, icpForm, icpResult]
   );
 
   const createLeadPayloadForRun = useCallback(() => {
     const nextRequestId = crypto.randomUUID();
     setRequestId(nextRequestId);
-    return buildLeadPayload(leadForm, nextRequestId);
-  }, [leadForm]);
+    return buildLeadPayload(leadForm, nextRequestId, icpForm, icpResult);
+  }, [leadForm, icpForm, icpResult]);
 
   const updateLead = (key: keyof LeadFormData, value: string) =>
     setLeadForm((current) => ({ ...current, [key]: value }));

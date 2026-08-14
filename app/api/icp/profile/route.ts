@@ -49,9 +49,9 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       profile: {
         ...profile,
-        icp_data: profile.icp_data ? JSON.parse(profile.icp_data as any) : null,
-        gtm_strategy: profile.gtm_strategy ? JSON.parse(profile.gtm_strategy as any) : null,
-        buyer_persona: profile.buyer_persona ? JSON.parse(profile.buyer_persona as any) : null,
+        icp_data: profile.icp_data ? JSON.parse(typeof profile.icp_data === 'string' ? profile.icp_data : JSON.stringify(profile.icp_data)) : null,
+        gtm_strategy: profile.gtm_strategy ? JSON.parse(typeof profile.gtm_strategy === 'string' ? profile.gtm_strategy : JSON.stringify(profile.gtm_strategy)) : null,
+        buyer_persona: profile.buyer_persona ? JSON.parse(typeof profile.buyer_persona === 'string' ? profile.buyer_persona : JSON.stringify(profile.buyer_persona)) : null,
       },
     });
   } catch (error) {

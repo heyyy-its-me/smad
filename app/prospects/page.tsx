@@ -15,23 +15,9 @@ interface CompanyProfile {
   buyer_pain: string;
   target_segment: string;
   confidence_score: number;
-  icp_data: {
-    icp: string;
-    pain_severity: number;
-    market_size: number;
-    ease_of_sales: number;
-    score: number;
-  };
-  gtm_strategy: {
-    target_countries: string[];
-    target_regions: string[];
-    recommended_channels: string[];
-  };
-  buyer_persona: {
-    role: string[];
-    pain_points: string[];
-    goals: string[];
-  };
+  icp_data: Record<string, number | string> | null;
+  gtm_strategy: Record<string, unknown> | null;
+  buyer_persona: Record<string, string[] | unknown> | null;
   created_at: string;
   updated_at: string;
 }
@@ -190,7 +176,7 @@ export default function ProspectsPage() {
               </div>
 
               {/* ICP Data */}
-              {profile.icp_data && (
+              {profile.icp_data && typeof profile.icp_data === 'object' && (
                 <div
                   style={{
                     background: '#1a1a1a',
@@ -206,25 +192,25 @@ export default function ProspectsPage() {
                     <div style={{ background: 'rgba(59, 130, 246, 0.1)', padding: '12px', borderRadius: '8px' }}>
                       <p style={{ margin: '0 0 4px', fontSize: '12px', color: '#9ca3af' }}>Overall Score</p>
                       <p style={{ margin: 0, fontSize: '24px', fontWeight: 700, color: '#3b82f6' }}>
-                        {profile.icp_data.score.toFixed(1)}
+                        {(profile.icp_data as Record<string, unknown>).score?.toString() || 'N/A'}
                       </p>
                     </div>
                     <div style={{ background: 'rgba(59, 130, 246, 0.1)', padding: '12px', borderRadius: '8px' }}>
                       <p style={{ margin: '0 0 4px', fontSize: '12px', color: '#9ca3af' }}>Pain Severity</p>
                       <p style={{ margin: 0, fontSize: '24px', fontWeight: 700, color: '#3b82f6' }}>
-                        {profile.icp_data.pain_severity}/10
+                        {(profile.icp_data as Record<string, unknown>).pain_severity}/10
                       </p>
                     </div>
                     <div style={{ background: 'rgba(59, 130, 246, 0.1)', padding: '12px', borderRadius: '8px' }}>
                       <p style={{ margin: '0 0 4px', fontSize: '12px', color: '#9ca3af' }}>Market Size</p>
                       <p style={{ margin: 0, fontSize: '24px', fontWeight: 700, color: '#3b82f6' }}>
-                        {profile.icp_data.market_size}/10
+                        {(profile.icp_data as Record<string, unknown>).market_size}/10
                       </p>
                     </div>
                     <div style={{ background: 'rgba(59, 130, 246, 0.1)', padding: '12px', borderRadius: '8px' }}>
                       <p style={{ margin: '0 0 4px', fontSize: '12px', color: '#9ca3af' }}>Ease of Sales</p>
                       <p style={{ margin: 0, fontSize: '24px', fontWeight: 700, color: '#3b82f6' }}>
-                        {profile.icp_data.ease_of_sales}/10
+                        {(profile.icp_data as Record<string, unknown>).ease_of_sales}/10
                       </p>
                     </div>
                   </div>
@@ -232,7 +218,7 @@ export default function ProspectsPage() {
               )}
 
               {/* GTM Strategy */}
-              {profile.gtm_strategy && (
+              {profile.gtm_strategy && typeof profile.gtm_strategy === 'object' && (
                 <div
                   style={{
                     background: '#1a1a1a',
@@ -250,20 +236,22 @@ export default function ProspectsPage() {
                         TARGET REGIONS
                       </p>
                       <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                        {profile.gtm_strategy.target_regions?.map((region, i) => (
-                          <span
-                            key={i}
-                            style={{
-                              background: 'rgba(200, 200, 200, 0.1)',
-                              border: '1px solid rgba(200, 200, 200, 0.3)',
-                              padding: '4px 12px',
-                              borderRadius: '16px',
-                              fontSize: '12px',
-                            }}
-                          >
-                            {region}
-                          </span>
-                        ))}
+                        {Array.isArray((profile.gtm_strategy as Record<string, unknown>).target_regions)
+                          ? ((profile.gtm_strategy as Record<string, unknown>).target_regions as string[]).map((region, i) => (
+                              <span
+                                key={i}
+                                style={{
+                                  background: 'rgba(200, 200, 200, 0.1)',
+                                  border: '1px solid rgba(200, 200, 200, 0.3)',
+                                  padding: '4px 12px',
+                                  borderRadius: '16px',
+                                  fontSize: '12px',
+                                }}
+                              >
+                                {region}
+                              </span>
+                            ))
+                          : null}
                       </div>
                     </div>
                     <div>
@@ -279,11 +267,13 @@ export default function ProspectsPage() {
                           gap: '6px',
                         }}
                       >
-                        {profile.gtm_strategy.recommended_channels?.map((channel, i) => (
-                          <li key={i} style={{ fontSize: '14px' }}>
-                            {channel}
-                          </li>
-                        ))}
+                        {Array.isArray((profile.gtm_strategy as Record<string, unknown>).recommended_channels)
+                          ? ((profile.gtm_strategy as Record<string, unknown>).recommended_channels as string[]).map((channel, i) => (
+                              <li key={i} style={{ fontSize: '14px' }}>
+                                {channel}
+                              </li>
+                            ))
+                          : null}
                       </ul>
                     </div>
                   </div>
@@ -291,7 +281,7 @@ export default function ProspectsPage() {
               )}
 
               {/* Buyer Persona */}
-              {profile.buyer_persona && (
+              {profile.buyer_persona && typeof profile.buyer_persona === 'object' && (
                 <div
                   style={{
                     background: '#1a1a1a',
@@ -310,11 +300,13 @@ export default function ProspectsPage() {
                         KEY ROLES
                       </p>
                       <ul style={{ margin: 0, paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                        {profile.buyer_persona.role?.map((role, i) => (
-                          <li key={i} style={{ fontSize: '14px' }}>
-                            {role}
-                          </li>
-                        ))}
+                        {Array.isArray((profile.buyer_persona as Record<string, unknown>).role)
+                          ? ((profile.buyer_persona as Record<string, unknown>).role as string[]).map((role, i) => (
+                              <li key={i} style={{ fontSize: '14px' }}>
+                                {role}
+                              </li>
+                            ))
+                          : null}
                       </ul>
                     </div>
                     <div>
@@ -322,11 +314,15 @@ export default function ProspectsPage() {
                         PAIN POINTS
                       </p>
                       <ul style={{ margin: 0, paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                        {profile.buyer_persona.pain_points?.slice(0, 2).map((pain, i) => (
-                          <li key={i} style={{ fontSize: '13px', lineHeight: 1.4 }}>
-                            {pain.substring(0, 50)}...
-                          </li>
-                        ))}
+                        {Array.isArray((profile.buyer_persona as Record<string, unknown>).pain_points)
+                          ? ((profile.buyer_persona as Record<string, unknown>).pain_points as string[])
+                              .slice(0, 2)
+                              .map((pain, i) => (
+                                <li key={i} style={{ fontSize: '13px', lineHeight: 1.4 }}>
+                                  {pain.substring(0, 50)}...
+                                </li>
+                              ))
+                          : null}
                       </ul>
                     </div>
                     <div>
@@ -334,11 +330,15 @@ export default function ProspectsPage() {
                         KEY GOALS
                       </p>
                       <ul style={{ margin: 0, paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                        {profile.buyer_persona.goals?.slice(0, 2).map((goal, i) => (
-                          <li key={i} style={{ fontSize: '13px', lineHeight: 1.4 }}>
-                            {goal.substring(0, 50)}...
-                          </li>
-                        ))}
+                        {Array.isArray((profile.buyer_persona as Record<string, unknown>).goals)
+                          ? ((profile.buyer_persona as Record<string, unknown>).goals as string[])
+                              .slice(0, 2)
+                              .map((goal, i) => (
+                                <li key={i} style={{ fontSize: '13px', lineHeight: 1.4 }}>
+                                  {goal.substring(0, 50)}...
+                                </li>
+                              ))
+                          : null}
                       </ul>
                     </div>
                   </div>

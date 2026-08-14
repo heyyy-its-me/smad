@@ -25,12 +25,6 @@ pool.on('error', (err) => {
   console.error('[Database Pool Error]', err);
 });
 
-pool.on('idle', (client) => {
-  if (process.env.NODE_ENV === 'development') {
-    console.log('[Database] Client idle');
-  }
-});
-
 /**
  * Execute a SELECT query and return all rows
  */

@@ -18,6 +18,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { updateLeadResult, failLeadResult, initLeadResult } from '@/lib/lead-store';
+import { releaseLeadStart } from '@/lib/lead-start-lock';
 
 export async function POST(request: NextRequest) {
   try {
@@ -48,6 +49,7 @@ export async function POST(request: NextRequest) {
       if (!failLeadResult(requestId, message ?? reason ?? 'Leads did not meet qualification threshold', { customer_id: customerId, user_id: userId })) {
         return NextResponse.json({ error: 'Request ID not found' }, { status: 404 });
       }
+      releaseLeadStart(customerId, requestId);
       return NextResponse.json({ 
         ok: true, 
         status: 'low_score',
@@ -59,6 +61,7 @@ export async function POST(request: NextRequest) {
       if (!failLeadResult(requestId, body.error ?? 'Unknown error from n8n', { customer_id: customerId, user_id: userId })) {
         return NextResponse.json({ error: 'Request ID not found' }, { status: 404 });
       }
+      releaseLeadStart(customerId, requestId);
       return NextResponse.json({ ok: true, status: 'failed' });
     }
 
@@ -71,6 +74,7 @@ export async function POST(request: NextRequest) {
       })) {
         return NextResponse.json({ error: 'Request ID not found' }, { status: 404 });
       }
+      releaseLeadStart(customerId, requestId);
       return NextResponse.json({ ok: true, status: 'completed', lead_count: leads.length });
     }
 

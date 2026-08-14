@@ -5,6 +5,12 @@ import { Pool } from 'pg';
 import { hashPassword, verifyPassword } from './password';
 import type { AuthUser, SignupInput, StoredAuthUser } from './types';
 
+// Disable SSL certificate validation globally for serverless environment
+// AWS RDS uses self-signed certificates
+if (process.env.NODE_ENV === 'production') {
+  process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+}
+
 interface AuthStoreData {
   users: StoredAuthUser[];
   customers: Array<{ id: string; name: string; created_at: string }>;

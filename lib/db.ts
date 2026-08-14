@@ -1,5 +1,11 @@
 import { Pool, PoolClient } from 'pg';
 
+// Disable SSL certificate validation globally for serverless environment
+// AWS RDS uses self-signed certificates
+if (process.env.NODE_ENV === 'production') {
+  process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+}
+
 // Ensure DATABASE_URL is set
 if (!process.env.DATABASE_URL) {
   throw new Error('DATABASE_URL environment variable is required');

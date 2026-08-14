@@ -39,11 +39,23 @@ export async function POST(request: NextRequest) {
 
     return response;
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Unknown error';
+    const message = error instanceof Error ? error.message : String(error);
+    
+    // Log full error for debugging
+    console.error('[Auth Login] Error:', {
+      message,
+      stack: error instanceof Error ? error.stack : undefined,
+      dbConfigured: !!process.env.DATABASE_URL,
+      jwtConfigured: !!process.env.JWT_SECRET,
+    });
+
     if (message.startsWith('JWT_SECRET')) {
       return NextResponse.json({ error: 'Authentication is not configured. Set JWT_SECRET and restart the app.' }, { status: 503 });
     }
-    console.error('[Auth Login] Failed:', message);
-    return NextResponse.json({ error: 'Login failed' }, { status: 500 });
+    if (message.includes('DATABASE_URL') || message.includes('connect')) {
+      return NextResponse.json({ error: 'Database is not configured or unreachable' }, { status: 503 });
+    }
+    
+    return NextResponse.json({ error: 'Login failed', details: message }, { status: 500 });
   }
 }

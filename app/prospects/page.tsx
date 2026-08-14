@@ -58,7 +58,7 @@ export default function ProspectsPage() {
       <Sidebar activeView="studio" onViewChange={() => {}} />
       
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-        <TopBar />
+        <TopBar agentTitle="Company Profile" status="Ready" isRunning={false} />
         
         <div
           style={{

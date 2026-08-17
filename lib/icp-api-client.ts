@@ -33,6 +33,9 @@ export interface GTMStrategy {
 
 export interface ICPProfile {
   icp: string;
+  industry?: string | string[];
+  industries?: string[];
+  target_industries?: string[];
   pain_severity: number;
   market_size: number;
   ease_of_sales: number;
@@ -133,20 +136,52 @@ async function postICPRecommendation(
  * Returns comma-separated string for Lead Management form
  */
 export function extractRecommendedIndustries(response: ICPRecommendationResponse): string {
-  // Extract from recommended_segment if available
-  if (response.analysis?.recommended_segment) {
-    // Try to extract industry keywords from the segment description
-    const segment = response.analysis.recommended_segment.toLowerCase();
-    // Simple heuristic: if it contains industry keywords, use them
-    if (segment.includes('security')) return 'Security & Compliance';
-    if (segment.includes('logistics')) return 'Logistics & Supply Chain';
-    if (segment.includes('manufacturing')) return 'Manufacturing';
-    if (segment.includes('healthcare')) return 'Healthcare';
-    if (segment.includes('finance')) return 'Financial Services';
-    if (segment.includes('retail')) return 'Retail & E-Commerce';
-    if (segment.includes('energy')) return 'Energy & Utilities';
-  }
-  return '';
+  const unique = (values: string[]) => [...new Map(
+    values
+      .map((value) => value.trim())
+      .filter(Boolean)
+      .map((value) => [value.toLowerCase(), value] as const)
+  ).values()];
+
+  const toValues = (value: unknown): string[] => {
+    if (Array.isArray(value)) return value.flatMap(toValues);
+    if (typeof value !== 'string') return [];
+    return value.split(/[,;\n]/).map((item) => item.trim()).filter(Boolean);
+  };
+
+  // Prefer the industries explicitly returned by the ICP engine. Its response
+  // schema has evolved, so accept the documented variants from every ICP tier.
+  const profiles = [response.primary_icp, ...(response.secondary_icps ?? [])];
+  const explicitIndustries = unique(profiles.flatMap((profile) => [
+    ...toValues(profile?.industry),
+    ...toValues(profile?.industries),
+    ...toValues(profile?.target_industries),
+  ]));
+  if (explicitIndustries.length) return explicitIndustries.join(', ');
+
+  // Older responses disclose the vertical in text; derive it afresh rather
+  // than retaining an industry from an earlier run.
+  const sourceText = [
+    response.analysis?.recommended_segment,
+    ...profiles.map((profile) => profile?.icp),
+  ].filter((value): value is string => Boolean(value)).join(' ').toLowerCase();
+  const disclosedIndustries: Array<[RegExp, string]> = [
+    [/\b(logistics|supply chain|shipping|freight)\b/, 'Logistics & Supply Chain'],
+    [/\b(transportation|trucking|fleet)\b/, 'Transportation/Trucking/Railroad'],
+    [/\b(healthcare|health care|hospital|medical)\b/, 'Hospital & Health Care'],
+    [/\b(fintech|financial services|banking|insurance)\b/, 'Financial Services'],
+    [/\b(cybersecurity|cyber security|computer security)\b/, 'Computer & Network Security'],
+    [/\b(manufacturing|industrial automation)\b/, 'Industrial Automation'],
+    [/\b(retail|e-commerce|ecommerce)\b/, 'Retail'],
+    [/\b(software|saas)\b/, 'Computer Software'],
+    [/\b(education|edtech|e-learning)\b/, 'E-Learning'],
+    [/\b(energy|utilities|renewable)\b/, 'Utilities'],
+  ];
+
+  return unique(disclosedIndustries
+    .filter(([pattern]) => pattern.test(sourceText))
+    .map(([, industry]) => industry)
+  ).join(', ');
 }
 
 /**

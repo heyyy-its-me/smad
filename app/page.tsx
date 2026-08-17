@@ -33,7 +33,7 @@ type LeadFormData = {
 };
 
 const initialLeadForm: LeadFormData = {
-  industry: "Logistics & Supply Chain",
+  industry: "",
   roles: "Fleet Manager, Director of Operations",
   region: "",
   cities: "",
@@ -158,7 +158,9 @@ export default function Home() {
 
     setLeadForm((current) => ({
       ...current,
-      ...(industry && { industry }),
+      // Always replace the previous recommendation. Keeping the old value
+      // would make a later ICP run search the wrong industry.
+      industry,
       ...(region && { region }),
       ...(roles && { roles }),
       ...(companySize && { company_size: companySize }),

@@ -17,6 +17,7 @@ export interface ICPRequestPayload {
 export interface AnalysisData {
   company_name: string;
   product_name: string;
+  industries?: string[];
   positioning: string;
   differentiator: string;
   core_problem: string;
@@ -149,14 +150,18 @@ export function extractRecommendedIndustries(response: ICPRecommendationResponse
     return value.split(/[,;\n]/).map((item) => item.trim()).filter(Boolean);
   };
 
-  // Prefer the industries explicitly returned by the ICP engine. Its response
-  // schema has evolved, so accept the documented variants from every ICP tier.
+  // Prefer the industries explicitly returned by the ICP engine. The current
+  // Strategy response provides these at analysis.industries; older variants
+  // can expose them on an ICP tier instead.
   const profiles = [response.primary_icp, ...(response.secondary_icps ?? [])];
-  const explicitIndustries = unique(profiles.flatMap((profile) => [
-    ...toValues(profile?.industry),
-    ...toValues(profile?.industries),
-    ...toValues(profile?.target_industries),
-  ]));
+  const explicitIndustries = unique([
+    ...toValues(response.analysis?.industries),
+    ...profiles.flatMap((profile) => [
+      ...toValues(profile?.industry),
+      ...toValues(profile?.industries),
+      ...toValues(profile?.target_industries),
+    ]),
+  ]);
   if (explicitIndustries.length) return explicitIndustries.join(', ');
 
   // Older responses disclose the vertical in text; derive it afresh rather

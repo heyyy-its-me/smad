@@ -947,7 +947,7 @@
                   },
                   {
                       "parameters":  {
-                                         "jsCode":  "const request = $input.item.json;\nconst body = request.body ?? request;\n\nconst isManualTrigger = Array.isArray(body.industry) || Array.isArray(body.roles);\n\nif (isManualTrigger) {\n  return {\n    request_id:             body.request_id      || \u0027\u0027,\n    product_name:           body.product_name || \u0027Our Product\u0027,\n    company_name:           body.company_name || \u0027Our Company\u0027,\n    positioning:            \u0027\u0027,\n    target_market:          \u0027B2B companies looking to scale\u0027,\n    messaging:              \u0027\u0027,\n    primary_icp:            \u0027{}\u0027,\n    secondary_icp:          \u0027{}\u0027,\n    tertiary_icp:           \u0027{}\u0027,\n    target_industries:      body.target_industries || (Array.isArray(body.industry) ? body.industry.join(\u0027, \u0027) : \u0027\u0027),\n    ideal_company_size:     Array.isArray(body.company_size)  ? body.company_size.join(\u0027, \u0027)  : \u0027\u0027,\n    qualification_criteria: \u0027\u0027,\n    priority_regions:       Array.isArray(body.region)        ? body.region.join(\u0027, \u0027)        : \u0027Canada\u0027,\n    priority_cities:        Array.isArray(body.cities)        ? body.cities.join(\u0027, \u0027)        : \u0027\u0027,\n    priority_states:        Array.isArray(body.states)        ? body.states.join(\u0027, \u0027)        : \u0027\u0027,\n    job_titles:             Array.isArray(body.roles)         ? body.roles.join(\u0027, \u0027)         : \u0027\u0027,\n    pain_points:            \u0027\u0027,\n    business_goals:         \u0027\u0027,\n    business_context:       body.business_context || \u0027\u0027\n  };\n}\n\n// Ã¢â€â‚¬Ã¢â€â‚¬ Webhook path Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬\nconst analysis     = body.analysis     || {};\nconst primaryIcp   = body.primary_icp  || {};\nconst buyerPersona = body.buyer_persona || {};\nconst gtmStrategy  = body.gtm_strategy  || {};\n\nreturn {\n  request_id:             body.request_id || \u0027\u0027,\n  product_name:           analysis.product_name   || body.product_name   || \u0027Our Product\u0027,\n  company_name:           analysis.company_name   || body.company_name   || \u0027Our Company\u0027,\n  positioning:            analysis.positioning    || body.positioning    || \u0027\u0027,\n  target_market:          primaryIcp.icp         || body.target_market  || \u0027B2B companies looking to scale\u0027,\n  messaging:              analysis.key_messages   || \u0027\u0027,\n  primary_icp:            JSON.stringify(primaryIcp),\n  secondary_icp:          JSON.stringify(body.secondary_icp || {}),\n  tertiary_icp:           JSON.stringify(body.tertiary_icp  || {}),\n  target_industries:      Array.isArray(primaryIcp.industry)\n                            ? primaryIcp.industry.join(\u0027, \u0027)\n                            : (primaryIcp.industry || \u0027\u0027),\n  ideal_company_size:     primaryIcp.company_size     || \u0027\u0027,\n  qualification_criteria: primaryIcp.qualification    || \u0027\u0027,\n  priority_regions:       Array.isArray(gtmStrategy.target_countries)\n                            ? gtmStrategy.target_countries.join(\u0027, \u0027)\n                            : \u0027Canada\u0027,\n  priority_cities:        Array.isArray(gtmStrategy.target_cities)\n                            ? gtmStrategy.target_cities.join(\u0027, \u0027)\n                            : \u0027\u0027,\n  priority_states:        Array.isArray(gtmStrategy.target_states)\n                            ? gtmStrategy.target_states.join(\u0027, \u0027)\n                            : \u0027\u0027,\n  job_titles:             Array.isArray(primaryIcp.job_titles)\n                            ? primaryIcp.job_titles.join(\u0027, \u0027)\n                            : (Array.isArray(buyerPersona.roles) ? buyerPersona.roles.join(\u0027, \u0027) : \u0027\u0027),\n  pain_points:            Array.isArray(buyerPersona.pain_points)\n                            ? buyerPersona.pain_points.join(\u0027, \u0027)\n                            : \u0027\u0027,\n  business_goals:         Array.isArray(buyerPersona.business_goals)\n                            ? buyerPersona.business_goals.join(\u0027, \u0027)\n                            : \u0027\u0027,\n  business_context:       analysis.business_context || \u0027\u0027\n};"
+                                         "jsCode":  "const request = $input.item.json;\nconst body = request.body ?? request;\n\nconst isManualTrigger = Array.isArray(body.industry) || Array.isArray(body.roles);\n\nif (isManualTrigger) {\n  return {\n    request_id:             body.request_id      || \u0027\u0027,\n    customer_id:            body.customer_id     || \u0027\u0027,\n    user_id:                body.user_id         || \u0027\u0027,\n    callback_url:           body.callback_url    || \u0027\u0027,\n    product_name:           body.product_name || \u0027Our Product\u0027,\n    company_name:           body.company_name || \u0027Our Company\u0027,\n    positioning:            \u0027\u0027,\n    target_market:          \u0027B2B companies looking to scale\u0027,\n    messaging:              \u0027\u0027,\n    primary_icp:            \u0027{}\u0027,\n    secondary_icp:          \u0027{}\u0027,\n    tertiary_icp:           \u0027{}\u0027,\n    target_industries:      body.target_industries || (Array.isArray(body.industry) ? body.industry.join(\u0027, \u0027) : \u0027\u0027),\n    ideal_company_size:     Array.isArray(body.company_size)  ? body.company_size.join(\u0027, \u0027)  : \u0027\u0027,\n    qualification_criteria: \u0027\u0027,\n    priority_regions:       Array.isArray(body.region)        ? body.region.join(\u0027, \u0027)        : \u0027Canada\u0027,\n    priority_cities:        Array.isArray(body.cities)        ? body.cities.join(\u0027, \u0027)        : \u0027\u0027,\n    priority_states:        Array.isArray(body.states)        ? body.states.join(\u0027, \u0027)        : \u0027\u0027,\n    job_titles:             Array.isArray(body.roles)         ? body.roles.join(\u0027, \u0027)         : \u0027\u0027,\n    pain_points:            \u0027\u0027,\n    business_goals:         \u0027\u0027,\n    business_context:       body.business_context || \u0027\u0027\n  };\n}\n\n// Ã¢â€â‚¬Ã¢â€â‚¬ Webhook path Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬\nconst analysis     = body.analysis     || {};\nconst primaryIcp   = body.primary_icp  || {};\nconst buyerPersona = body.buyer_persona || {};\nconst gtmStrategy  = body.gtm_strategy  || {};\n\nreturn {\n  request_id:             body.request_id || \u0027\u0027,\n  customer_id:            body.customer_id || \u0027\u0027,\n  user_id:                body.user_id || \u0027\u0027,\n  callback_url:           body.callback_url || \u0027\u0027,\n  product_name:           analysis.product_name   || body.product_name   || \u0027Our Product\u0027,\n  company_name:           analysis.company_name   || body.company_name   || \u0027Our Company\u0027,\n  positioning:            analysis.positioning    || body.positioning    || \u0027\u0027,\n  target_market:          primaryIcp.icp         || body.target_market  || \u0027B2B companies looking to scale\u0027,\n  messaging:              analysis.key_messages   || \u0027\u0027,\n  primary_icp:            JSON.stringify(primaryIcp),\n  secondary_icp:          JSON.stringify(body.secondary_icp || {}),\n  tertiary_icp:           JSON.stringify(body.tertiary_icp  || {}),\n  target_industries:      Array.isArray(primaryIcp.industry)\n                            ? primaryIcp.industry.join(\u0027, \u0027)\n                            : (primaryIcp.industry || \u0027\u0027),\n  ideal_company_size:     primaryIcp.company_size     || \u0027\u0027,\n  qualification_criteria: primaryIcp.qualification    || \u0027\u0027,\n  priority_regions:       Array.isArray(gtmStrategy.target_countries)\n                            ? gtmStrategy.target_countries.join(\u0027, \u0027)\n                            : \u0027Canada\u0027,\n  priority_cities:        Array.isArray(gtmStrategy.target_cities)\n                            ? gtmStrategy.target_cities.join(\u0027, \u0027)\n                            : \u0027\u0027,\n  priority_states:        Array.isArray(gtmStrategy.target_states)\n                            ? gtmStrategy.target_states.join(\u0027, \u0027)\n                            : \u0027\u0027,\n  job_titles:             Array.isArray(primaryIcp.job_titles)\n                            ? primaryIcp.job_titles.join(\u0027, \u0027)\n                            : (Array.isArray(buyerPersona.roles) ? buyerPersona.roles.join(\u0027, \u0027) : \u0027\u0027),\n  pain_points:            Array.isArray(buyerPersona.pain_points)\n                            ? buyerPersona.pain_points.join(\u0027, \u0027)\n                            : \u0027\u0027,\n  business_goals:         Array.isArray(buyerPersona.business_goals)\n                            ? buyerPersona.business_goals.join(\u0027, \u0027)\n                            : \u0027\u0027,\n  business_context:       analysis.business_context || \u0027\u0027\n};"
                                      },
                       "type":  "n8n-nodes-base.code",
                       "typeVersion":  2,
@@ -1304,7 +1304,7 @@
                   {
                       "parameters":  {
                                          "mode":  "runOnceForAllItems",
-                                         "jsCode":  "const leads = $(\u0027Build Outreach Payload\u0027).all().map(({ json }) =\u003e ({\n  company_name: json[\u0027Company Name\u0027] || json.company_name || \u0027\u0027,\n  contact_name: json[\u0027Contact Name\u0027] || json.contact_name || \u0027\u0027,\n  job_title: json[\u0027Designation\u0027] || json.job_title || \u0027\u0027,\n  email: json[\u0027Email\u0027] || json.email || \u0027\u0027,\n  location: json[\u0027Location\u0027] || json.location || \u0027\u0027,\n  industry: json[\u0027Industry\u0027] || json.industry || \u0027\u0027,\n  lead_score: json[\u0027Lead Score\u0027] || json.lead_score || null,\n  priority: json[\u0027Priority\u0027] || json.priority || \u0027\u0027\n}));\nconst request = $(\u0027Parse ICP Payload\u0027).first().json;\n\nreturn [{ json: {\n  status: \u0027completed\u0027,\n  request_id: request.request_id || \u0027\u0027,\n  total_count: leads.length,\n  leads\n} }];"
+                                         "jsCode":  "const leads = $(\u0027Build Outreach Payload\u0027).all().map(({ json }) =\u003e ({\n  company_name: json[\u0027Company Name\u0027] || json.company_name || \u0027\u0027,\n  contact_name: json[\u0027Contact Name\u0027] || json.contact_name || \u0027\u0027,\n  job_title: json[\u0027Designation\u0027] || json.job_title || \u0027\u0027,\n  email: json[\u0027Email\u0027] || json.email || \u0027\u0027,\n  location: json[\u0027Location\u0027] || json.location || \u0027\u0027,\n  industry: json[\u0027Industry\u0027] || json.industry || \u0027\u0027,\n  lead_score: json[\u0027Lead Score\u0027] || json.lead_score || null,\n  priority: json[\u0027Priority\u0027] || json.priority || \u0027\u0027\n}));\nconst request = $(\u0027Parse ICP Payload\u0027).first().json;\n\nreturn [{ json: {\n  status: \u0027completed\u0027,\n  request_id: request.request_id || \u0027\u0027,\n  customer_id: request.customer_id || \u0027\u0027,\n  user_id: request.user_id || \u0027\u0027,\n  total_count: leads.length,\n  leads\n} }];"
                                      },
                       "type":  "n8n-nodes-base.code",
                       "typeVersion":  2,
@@ -1331,6 +1331,35 @@
                                    ],
                       "id":  "a43c1ec2-a5d2-4e87-9bc4-0604f7c416e6",
                       "name":  "Respond to Webhook"
+                  },
+                  {
+                      "parameters":  {
+                                         "method":  "POST",
+                                         "url":  "={{ $('Parse ICP Payload').first().json.callback_url }}",
+                                         "sendHeaders":  true,
+                                         "headerParameters":  {
+                                                                  "parameters":  [
+                                                                                     {
+                                                                                         "name":  "Content-Type",
+                                                                                         "value":  "application/json"
+                                                                                     }
+                                                                                 ]
+                                                              },
+                                         "sendBody":  true,
+                                         "specifyBody":  "json",
+                                         "jsonBody":  "={{ JSON.stringify($json) }}",
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "type":  "n8n-nodes-base.httpRequest",
+                      "typeVersion":  4.2,
+                      "position":  [
+                                       13008,
+                                       4128
+                                   ],
+                      "id":  "93dbe310-a080-4a6c-a632-f5194fd1c537",
+                      "name":  "Notify App - Lead Gen Complete"
                   }
               ],
     "connections":  {
@@ -1726,18 +1755,28 @@
                                                           ]
                                                       ]
                                          },
-                        "Insert Leads into Agent1":  {
+                        "Prepare Webhook Response":  {
                                                          "main":  [
                                                                       [
                                                                           {
-                                                                              "node":  "Notify Bridge - Lead Gen Complete",
+                                                                              "node":  "Notify App - Lead Gen Complete",
                                                                               "type":  "main",
                                                                               "index":  0
                                                                           }
                                                                       ]
                                                                   ]
                                                      },
-                        "Prepare Webhook Response":  { "main": [ { "node": "Respond to Webhook", "type": "main", "index": 0 } ] }
+                        "Notify App - Lead Gen Complete":  {
+                                                              "main":  [
+                                                                           [
+                                                                               {
+                                                                                   "node":  "Respond to Webhook",
+                                                                                   "type":  "main",
+                                                                                   "index":  0
+                                                                               }
+                                                                           ]
+                                                                       ]
+                                                          }
                     },
     "pinData":  {
 

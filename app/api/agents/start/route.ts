@@ -40,6 +40,25 @@ export async function POST(request: NextRequest) {
     };
 
     if (agentId === 'leads') {
+      // Reject auto-triggered leads requests from n8n (no lead form data, just ICP analysis)
+      // A valid leads request must have either roles/industry (form data) or explicitly be from user
+      const hasLeadFormData = payload && (
+        typeof payload.roles === 'string' || 
+        typeof payload.industry === 'string' ||
+        Array.isArray(payload.roles) ||
+        Array.isArray(payload.industry)
+      );
+      
+      // Also reject if only ICP analysis fields present (indicates n8n auto-trigger)
+      const hasOnlyICPAnalysis = payload && payload.analysis && !hasLeadFormData;
+      
+      if (hasOnlyICPAnalysis) {
+        return NextResponse.json(
+          { error: 'Invalid leads request: ICP auto-trigger not supported. Please manually run leads workflow.' },
+          { status: 400 }
+        );
+      }
+
       const requestId = typeof executionPayload.request_id === 'string'
         ? executionPayload.request_id
         : crypto.randomUUID();

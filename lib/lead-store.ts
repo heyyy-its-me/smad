@@ -83,7 +83,7 @@ export async function updateLeadResult(
        WHERE request_id = $6 AND status = 'processing'`,
       [JSON.stringify(data.leads), data.total_count, Date.now(), data.customer_id ?? null, data.user_id ?? null, requestId]
     );
-    return result.rowCount > 0;
+    return result > 0;
   } catch (err) {
     console.error('[Lead Store] Error updating result:', err);
     return false;
@@ -100,7 +100,7 @@ export async function failLeadResult(requestId: string, error: string, context?:
        WHERE request_id = $5`,
       [error, Date.now(), context?.customer_id ?? null, context?.user_id ?? null, requestId]
     );
-    return result.rowCount > 0;
+    return result > 0;
   } catch (err) {
     console.error('[Lead Store] Error failing result:', err);
     return false;

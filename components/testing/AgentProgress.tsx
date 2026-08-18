@@ -179,7 +179,7 @@ export default function AgentProgress({
       setExecState('idle');
       setExecError(null);
     }
-  }, [agentId, payload]);
+  }, [agentId]);
 
   // Auto-switch to output view when leads complete
   useEffect(() => {

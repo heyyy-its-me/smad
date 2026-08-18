@@ -17,11 +17,14 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { updateLeadResult, failLeadResult, initLeadResult } from '@/lib/lead-store';
+import { updateLeadResult, failLeadResult, initLeadResult, initLeadResultsTable } from '@/lib/lead-store';
 import { releaseLeadStart } from '@/lib/lead-start-lock';
 
 export async function POST(request: NextRequest) {
   try {
+    // Ensure table exists
+    await initLeadResultsTable();
+
     const body = await request.json();
 
     const requestId = body.request_id as string | undefined;
@@ -36,7 +39,7 @@ export async function POST(request: NextRequest) {
     const userId = typeof body.user_id === 'string' ? body.user_id : undefined;
 
     // Initialize if not already tracked (in case callback arrives before poller)
-    initLeadResult(requestId, { customer_id: customerId, user_id: userId });
+    await initLeadResult(requestId, { customer_id: customerId, user_id: userId });
 
     const status = body.status as string | undefined;
     const leads = body.leads as Record<string, unknown>[] | undefined;
@@ -46,10 +49,10 @@ export async function POST(request: NextRequest) {
     if (status === 'low_score') {
       const reason = body.reason as string | undefined;
       const message = body.message as string | undefined;
-      if (!failLeadResult(requestId, message ?? reason ?? 'Leads did not meet qualification threshold', { customer_id: customerId, user_id: userId })) {
+      if (!await failLeadResult(requestId, message ?? reason ?? 'Leads did not meet qualification threshold', { customer_id: customerId, user_id: userId })) {
         return NextResponse.json({ error: 'Request ID not found' }, { status: 404 });
       }
-      releaseLeadStart(customerId, requestId);
+      await releaseLeadStart(customerId, requestId);
       return NextResponse.json({ 
         ok: true, 
         status: 'low_score',
@@ -58,15 +61,15 @@ export async function POST(request: NextRequest) {
     }
 
     if (status === 'failed' || status === 'error') {
-      if (!failLeadResult(requestId, body.error ?? 'Unknown error from n8n', { customer_id: customerId, user_id: userId })) {
+      if (!await failLeadResult(requestId, body.error ?? 'Unknown error from n8n', { customer_id: customerId, user_id: userId })) {
         return NextResponse.json({ error: 'Request ID not found' }, { status: 404 });
       }
-      releaseLeadStart(customerId, requestId);
+      await releaseLeadStart(customerId, requestId);
       return NextResponse.json({ ok: true, status: 'failed' });
     }
 
     if (Array.isArray(leads)) {
-      if (!updateLeadResult(requestId, {
+      if (!await updateLeadResult(requestId, {
         leads,
         total_count: typeof totalCount === 'number' ? totalCount : leads.length,
         customer_id: customerId,
@@ -74,7 +77,7 @@ export async function POST(request: NextRequest) {
       })) {
         return NextResponse.json({ error: 'Request ID not found' }, { status: 404 });
       }
-      releaseLeadStart(customerId, requestId);
+      await releaseLeadStart(customerId, requestId);
       return NextResponse.json({ ok: true, status: 'completed', lead_count: leads.length });
     }
 

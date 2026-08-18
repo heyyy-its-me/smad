@@ -45,10 +45,17 @@ export default function AgentProgress({
   const [execError, setExecError] = useState<ExecutionError | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const runStartingRef = useRef(false);
+  const prevAgentIdRef = useRef<string | null>(null);
+  const justSwitchedAgentRef = useRef(false);
 
   // Subscribe to runner events
   useEffect(() => {
     const unsub = runner.on((event: RunnerEvent) => {
+      // Ignore runner events if we just switched agents or this event is for a different agent
+      if (justSwitchedAgentRef.current || event.agentId !== agentId) {
+        return;
+      }
+
       if (event.type === 'execution-start') {
         const current = runner.getResult();
         if (current) {
@@ -118,8 +125,38 @@ export default function AgentProgress({
     return () => unsub();
   }, [onRunningChange, onResult]);
 
+  // Track agent changes to prevent auto-run when switching agents
+  useEffect(() => {
+    if (prevAgentIdRef.current !== agentId) {
+      // Cancel any running execution before switching agents
+      if (runner.isRunning) {
+        runner.cancel();
+      }
+      
+      // Reset execution state when switching agents to prevent auto-run
+      setExecState('idle');
+      setResult(null);
+      setExecution(null);
+      setLogs([]);
+      setExecError(null);
+      justSwitchedAgentRef.current = true;
+      prevAgentIdRef.current = agentId;
+      // Keep the flag active longer to avoid race conditions
+      // Clear it after 300ms to let all effects and events settle
+      const timer = setTimeout(() => {
+        justSwitchedAgentRef.current = false;
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [agentId]);
+
   // Sync state on mount
   useEffect(() => {
+    // Skip sync if we just switched agents - prevent accidental restoration
+    if (justSwitchedAgentRef.current) {
+      return;
+    }
+
     const current = runner.getResult();
     if (current && current.agentId === agentId) {
       setResult(current);
@@ -167,6 +204,9 @@ export default function AgentProgress({
   }, [execution?.status]);
 
   const handleRun = useCallback(async () => {
+    // Clear the "just switched" flag when user manually clicks run
+    justSwitchedAgentRef.current = false;
+
     if (runStartingRef.current || runner.isRunning) return;
     runStartingRef.current = true;
 

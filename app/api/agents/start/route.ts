@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth/session';
 import { apiClient } from '@/lib/api-client';
 import { n8nWebhookAdapter } from '@/lib/n8n-webhook-adapter';
-import { initLeadResult } from '@/lib/lead-store';
+import { initLeadResult, initLeadResultsTable } from '@/lib/lead-store';
 import { registerLeadStart, releaseLeadStart } from '@/lib/lead-start-lock';
 import { initOutreachRun } from '@/lib/outreach-store';
 
@@ -47,7 +47,9 @@ export async function POST(request: NextRequest) {
       executionPayload.request_id = requestId;
       executionPayload.callback_url = `${callbackBaseUrl(request)}/api/leads/callback`;
 
-      const leadStart = registerLeadStart(auth.customer_id, executionPayload, requestId);
+      // Ensure tables exist and register lead start
+      await initLeadResultsTable();
+      const leadStart = await registerLeadStart(auth.customer_id, executionPayload, requestId);
       if (leadStart.duplicateOf) {
         return NextResponse.json({
           id: leadStart.duplicateOf,
@@ -76,7 +78,7 @@ export async function POST(request: NextRequest) {
         });
       }
 
-      initLeadResult(requestId, { customer_id: auth.customer_id, user_id: auth.user_id });
+      await initLeadResult(requestId, { customer_id: auth.customer_id, user_id: auth.user_id });
     }
 
     if (agentId === 'outreach' && typeof executionPayload.request_id === 'string') {
@@ -93,7 +95,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     const mayHaveStarted = (error as { name?: string })?.name === 'TimeoutError';
     if (leadRequestId && typeof auth?.customer_id === 'string' && !mayHaveStarted) {
-      releaseLeadStart(auth.customer_id, leadRequestId);
+      await releaseLeadStart(auth.customer_id, leadRequestId);
     }
 
     const statusCode = typeof (error as { statusCode?: unknown }).statusCode === 'number'

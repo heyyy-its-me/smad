@@ -352,9 +352,9 @@ export default function Home() {
                   }}
                   onICPResult={(result) => {
                     setICPResult(result);
-                    // Auto-switch to leads and fill form
+                    // Auto-fill the leads form from ICP results
+                    // User must manually click to switch to prospects tab - don't auto-trigger
                     autofillLeadFormFromICP(result);
-                    setActive("leads");
                   }}
                   onSendMailToLeads={openOutreach}
                   actionLabel={active === "outreach" ? `SEND EMAILS TO ${outreachLeads.length} LEAD${outreachLeads.length === 1 ? "" : "S"}` : undefined}

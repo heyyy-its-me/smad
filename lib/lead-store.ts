@@ -112,7 +112,7 @@ export async function getLeadResult(requestId: string, customerId: string): Prom
     const results = await query<StoredLeadResult>(
       `SELECT request_id, customer_id, user_id, leads, total_count, status, error, created_at, completed_at 
        FROM lead_results 
-       WHERE request_id = $1 AND customer_id = $2`,
+       WHERE request_id = $1 AND (customer_id = $2 OR customer_id IS NULL)`,
       [requestId, customerId]
     );
     

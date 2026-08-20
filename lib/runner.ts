@@ -411,7 +411,7 @@ export class AgentRunner {
     }
 
     const startPollingTime = Date.now();
-    const POLLING_TIMEOUT = 900000; // 15 minutes max polling time
+    const POLLING_TIMEOUT = 1200000; // 20 minutes max polling time
     const POLLING_INTERVAL = 3000; // Poll every 3 seconds
 
     this.poller = setInterval(async () => {
